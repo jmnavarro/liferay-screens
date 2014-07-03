@@ -1,0 +1,10 @@
+//
+//  Prefix.pch
+//  Liferay-iOS-Widgets-ObjC-Sample
+//
+//  Created by jmWork on 03/07/14.
+//  Copyright (c) 2014 Liferay. All rights reserved.
+//
+#import "liferay-ios-widgets.h"
+#import "Liferay_iOS_Widgets_ObjC_Sample-Swift.h"
+
