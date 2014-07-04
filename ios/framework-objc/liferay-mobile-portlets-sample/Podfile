@@ -1,0 +1,2 @@
+pod 'Liferay-iOS-SDK'
+pod 'MBProgressHUD', '~> 0.8'
