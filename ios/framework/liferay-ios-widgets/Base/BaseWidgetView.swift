@@ -1,11 +1,16 @@
-//
-//  BaseWidgetView.swift
-//  liferay-mobile-widgets-swift
-//
-//  Created by jmWork on 01/07/14.
-//  Copyright (c) 2014 Liferay. All rights reserved.
-//
-
+/**
+* Copyright (c) 2000-present Liferay, Inc. All rights reserved.
+*
+* This library is free software; you can redistribute it and/or modify it under
+* the terms of the GNU Lesser General Public License as published by the Free
+* Software Foundation; either version 2.1 of the License, or (at your option)
+* any later version.
+*
+* This library is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+* FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+* details.
+*/
 import UIKit
 
 class BaseWidgetView: UIView {
@@ -39,8 +44,9 @@ class BaseWidgetView: UIView {
 		self.endEditing(true)
 
 		// WTF!
-		// En teoría, un implicit optional se comporta igual que un puntero en Obj-C.
-		// Mentira cochina. Si se accede a su valor cuando es nulo, casca.
+		// In theory, an implicit optional (with `type!`) behaves the same as 
+		// ObjC pointer.
+		// But it's not true. If you access optional's value when it's empty, it crashes
 		customAction?(sender.restorationIdentifier, sender)
 	}
 
