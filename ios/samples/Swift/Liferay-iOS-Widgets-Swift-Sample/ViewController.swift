@@ -13,16 +13,31 @@
 */
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, LoginWidgetDelegate {
+
+	@IBOutlet var widget: BaseWidget!
                             
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		// Do any additional setup after loading the view, typically from a nib.
+
+		let loginWidget = widget as LoginWidget
+
+		loginWidget.delegate = self
 	}
 
 	override func didReceiveMemoryWarning() {
 		super.didReceiveMemoryWarning()
 		// Dispose of any resources that can be recreated.
+	}
+
+	func onLoginError(error: NSError)  {
+		println("Error -> " + error.description)
+
+	}
+
+	func onLoginResponse(attributes: Dictionary<String, String>)  {
+		println("Login -> " + attributes.description)
 	}
 
 

@@ -13,10 +13,23 @@
 */
 import UIKit
 
+@objc protocol LoginWidgetDelegate/*: NSObjectProtocol */{
+
+	func onLoginResponse(attributes: Dictionary<String, String>)
+	func onLoginError(error: NSError)
+
+	// TODO
+	// func onAutologed(session:LRSession)
+	// func onCredentialsSaved(session:LRSession)
+}
+
+
 //@objc(LoginWidget)
 class LoginWidget: BaseWidget {
 
-	override func onCreate()  {
+	@IBOutlet var delegate: LoginWidgetDelegate?
+
+	override func onCreate() {
 		loginView().emailField.text = "test@liferay.com"
 	}
 
@@ -51,11 +64,13 @@ class LoginWidget: BaseWidget {
 	}
 
 	override func onServerError(error: NSError) {
+		delegate?.onLoginError(error)
 		LiferayContext.instance.clearSession()
 		self.hideHUDWithMessage("Error signing in!", details: nil)
 	}
 
 	override func onServerResult(result: AnyObject!) {
+		delegate?.onLoginResponse(result as Dictionary)
 		self.hideHUDWithMessage("Sign in completed", details: nil)
 	}
 

@@ -112,9 +112,9 @@
 		889CA4BB19655F4B00664504 /* Base */ = {
 			isa = PBXGroup;
 			children = (
+				889CA4BE19655F4B00664504 /* BaseWidgetView.swift */,
 				889CA4BC19655F4B00664504 /* BaseWidget+progress.swift */,
 				889CA4BD19655F4B00664504 /* BaseWidget.swift */,
-				889CA4BE19655F4B00664504 /* BaseWidgetView.swift */,
 				889CA4BF19655F4B00664504 /* LiferayContext.swift */,
 			);
 			path = Base;

@@ -92,7 +92,6 @@ class BaseWidget: UIView, LRCallback {
 
 		let className = nameOfClass(self.dynamicType)
 
-		println(className)
 		let widgetName = className.componentsSeparatedByString("Widget")[0]
 		let viewName = widgetName + "View"
 
