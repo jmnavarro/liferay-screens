@@ -21,6 +21,8 @@ class ViewController: UIViewController, LoginWidgetDelegate {
 		super.viewDidLoad()
 		// Do any additional setup after loading the view, typically from a nib.
 
+		// WTF!
+		// Outlet assignment in IB doesn't work!!
 		let loginWidget = widget as LoginWidget
 
 		loginWidget.delegate = self

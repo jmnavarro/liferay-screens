@@ -25,7 +25,14 @@ import UIKit
 
 
 //@objc(LoginWidget)
-class LoginWidget: BaseWidget {
+@IBDesignable class LoginWidget: BaseWidget {
+	typealias AuthCall = (String, String, inout NSError) -> (Void)
+
+	enum AuthType {
+		case Email, Screenname
+	}
+
+	var authType: AuthType = AuthType.Email
 
 	@IBOutlet var delegate: LoginWidgetDelegate?
 
@@ -46,22 +53,44 @@ class LoginWidget: BaseWidget {
 	func sendLoginWithUsername(username:String, password:String) {
 		showHUDWithMessage("Sending sign in...", details:"Wait few seconds...")
 
-		LiferayContext.instance.currentSession = nil
-
 		let session = LiferayContext.instance.createSession(username, password: password)
 		session.callback = self
 
 		let service = LRUserService_v62(session: session)
 
+		if (authType == AuthType.Email) {
+			authCallWithEmail(username, password:password, service:service)
+		}
+		else if (authType == AuthType.Screenname) {
+			authCallWithScreenname(username, password:password, service:service)
+		}
+
+	}
+
+	func authCallWithEmail(email:String, password:String, service:LRUserService_v62) {
 		let companyId: CLongLong = (LiferayContext.instance.companyId as NSNumber).longLongValue
+
 		var outError: NSError?
 
-		service.getUserByEmailAddressWithCompanyId(companyId, emailAddress: username, error: &outError)
+		service.getUserByEmailAddressWithCompanyId(companyId, emailAddress:email, error:&outError)
 
 		if let error = outError {
 			self.onFailure(error)
 		}
 	}
+
+	func authCallWithScreenname(name:String, password:String, service:LRUserService_v62) {
+		let companyId: CLongLong = (LiferayContext.instance.companyId as NSNumber).longLongValue
+
+		var outError: NSError?
+
+		service.getUserByScreenNameWithCompanyId(companyId, screenName:name, error: &outError)
+
+		if let error = outError {
+			self.onFailure(error)
+		}
+	}
+
 
 	override func onServerError(error: NSError) {
 		delegate?.onLoginError(error)
