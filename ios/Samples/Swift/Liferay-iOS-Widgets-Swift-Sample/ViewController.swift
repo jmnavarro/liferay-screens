@@ -28,10 +28,10 @@ class ViewController: UIViewController, LoginWidgetDelegate {
 		// Outlet assignment in IB doesn't work!!
 		loginWidget.delegate = self
 
-		loginWidget.setAuthType(AuthType.Screenname)
+		loginWidget.authType = AuthType.Screenname
 
 
-		if LoginWidget.storedCredencials() {
+		if LoginWidget.storedSession() {
 			loginWidget.hidden = true
 		}
 		else {

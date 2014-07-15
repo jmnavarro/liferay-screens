@@ -23,27 +23,37 @@ class LoginView: BaseWidgetView, UITextFieldDelegate {
 	@IBOutlet var usernameLabel: UILabel
 	@IBOutlet var usernameField: UITextField
 	@IBOutlet var passwordField: UITextField
-	@IBOutlet var rememberSwitch: UISwitch
+	@IBOutlet var rememberSwitch: UISwitch?
 	@IBOutlet var loginButton: UIButton
 
 	var shouldRememberCredentials: Bool {
-		return rememberSwitch.on
+		println("should remember")
+		if let rememberSwitchValue = rememberSwitch {
+			return rememberSwitchValue.on
+		}
+		else {
+			return false
+		}
 	}
-
-    func setAuthType(authType: String) {
-        switch authType {
-        case AuthType.Email.toRaw():
+	
+	var authType : AuthType? {
+	didSet {
+		println("didSet auth" + authType!.toRaw())
+        switch authType! {
+        case AuthType.Email:
             usernameLabel.text = "Email"
             usernameField.keyboardType = UIKeyboardType.EmailAddress
-        case AuthType.Screenname.toRaw():
+        case AuthType.Screenname:
             usernameLabel.text = "Screen name"
             usernameField.keyboardType = UIKeyboardType.ASCIICapable
         default:
             usernameLabel.text = "Unknown"
         }
-    }
-    
-    // BaseWidgetView METHODS
+	}
+	}
+
+
+	// BaseWidgetView METHODS
     
     
     override func becomeFirstResponder() -> Bool {

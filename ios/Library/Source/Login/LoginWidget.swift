@@ -35,34 +35,35 @@ import UIKit
     
     var authMethod: AuthCall?
 
+	
+	// CLASS METHODS
+	
+	
 	class func storedSession() -> LRSession? {
 		return LRSession.storedSession()
 	}
-    
-	/*
-	WORKAROUND!
-	XCode crashes with "swift_unknownWeakLoadStrong" error
-	Storing the enum as a String seems to workaround the problem
-	This code is the optimal solution to be used when XCode is fixed
-
-	var authType: AuthType = AuthType.Email {
-		didSet {
-			loginView().setAuthType(authType)
-		}
+	
+	
+	// SETTER METHODS
+	
+	
+	var authType: AuthType? {
+	get {
+		return loginView().authType
 	}
-	*/
-    func setAuthType(authType:AuthType) {
-        loginView().setAuthType(authType.toRaw())
-        
-        authMethod = authMethods[authType.toRaw()]
-    }
+	set {
+		println(newValue?.toRaw())
+		let lv = loginView()
+		lv.authType = newValue
+	}
+	}
 
     
     // BaseWidget METHODS
     
     
 	override func onCreate() {
-        setAuthType(AuthType.Email)
+        authType = AuthType.Email
 
         loginView().usernameField.text = "test@liferay.com"
 
@@ -112,6 +113,7 @@ import UIKit
     
     
 	func loginView() -> LoginView {
+		println("get login view " + widgetView!.description)
 		return widgetView as LoginView
 	}
 
