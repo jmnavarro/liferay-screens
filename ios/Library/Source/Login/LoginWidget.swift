@@ -15,8 +15,11 @@ import UIKit
 
 @objc protocol LoginWidgetDelegate {
 
-    func onLoginResponse(attributes: Dictionary<String, Any!>)
-	func onLoginError(error: NSError)
+	@optional func onLoginResponse(attributes: Dictionary<String, Any!>)
+	@optional func onLoginError(error: NSError)
+
+	@optional func onCredentialsSaved(session:LRSession)
+	@optional func onCredentialsLoaded(session:LRSession)
 
 }
 
@@ -31,50 +34,75 @@ import UIKit
         AuthType.Screenname.toRaw(): authCallWithScreenname]
     
     var authMethod: AuthCall?
-    
-	/*
-	WORKAROUND!
-	XCode crashes with "swift_unknownWeakLoadStrong" error
-	Storing the enum as a String seems to workaround the problem
-	This code is the optimal solution to be used when XCode is fixed
 
-	var authType: AuthType = AuthType.Email {
-		didSet {
-			loginView().setAuthType(authType)
-		}
+	
+	// CLASS METHODS
+	
+	
+	class func storedSession() -> LRSession? {
+		return LRSession.storedSession()
 	}
-	*/
-    func setAuthType(authType:AuthType) {
-        loginView().setAuthType(authType.toRaw())
-        
-        authMethod = authMethods[authType.toRaw()]
-    }
+	
+	
+	// SETTER METHODS
+	
+	
+	var authType: AuthType? {
+	get {
+		return loginView().authType
+	}
+	set {
+		println(newValue?.toRaw())
+		let lv = loginView()
+		lv.authType = newValue
+	}
+	}
 
     
     // BaseWidget METHODS
     
     
 	override func onCreate() {
-        setAuthType(AuthType.Email)
+        authType = AuthType.Email
 
         loginView().usernameField.text = "test@liferay.com"
+
+		if let storedSession = LRSession.storedSession() {
+			LiferayContext.instance.currentSession = storedSession
+			if delegate {
+				println("hay delegate")
+			}
+			else {
+				println("no hay delegate")
+			}
+			delegate?.onCredentialsLoaded?(storedSession)
+		}
 	}
 
-	override func onCustomAction(actionName: String, sender: UIControl) {
+	override func onCustomAction(actionName: String?, sender: UIControl) {
 		if actionName == "login-action" {
 			sendLoginWithUsername(loginView().usernameField.text, password:loginView().passwordField.text)
 		}
 	}
 
     override func onServerError(error: NSError) {
-        delegate?.onLoginError(error)
-        LiferayContext.instance.clearSession()
+		delegate?.onLoginError?(error)
+
+		LiferayContext.instance.clearSession()
+		LRSession.emptyStore()
+
         hideHUDWithMessage("Error signing in!", details: nil)
     }
     
     override func onServerResult(result: AnyObject!) {
         if let dict = result as? Dictionary<String, Any!> {
-            delegate?.onLoginResponse(dict)
+			delegate?.onLoginResponse?(dict)
+
+			if loginView().shouldRememberCredentials {
+				if LiferayContext.instance.currentSession!.store() {
+					delegate?.onCredentialsSaved?(LiferayContext.instance.currentSession!)
+				}
+			}
         }
         
         hideHUDWithMessage("Sign in completed", details: nil)
@@ -85,6 +113,7 @@ import UIKit
     
     
 	func loginView() -> LoginView {
+		println("get login view " + widgetView!.description)
 		return widgetView as LoginView
 	}
 
@@ -98,7 +127,6 @@ import UIKit
 			self.onFailure(error)
 		}
 	}
-
 
 }
 
