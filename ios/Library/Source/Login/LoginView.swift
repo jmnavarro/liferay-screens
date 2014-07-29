@@ -39,7 +39,7 @@ class LoginView: BaseWidgetView, UITextFieldDelegate {
 	public func setAuthType(authType: String) {
 		switch authType {
 		case AuthType.Email.toRaw():
-            usernameField!.placeholder = "Email"
+            usernameField!.placeholder = "Email Address"
             usernameField!.keyboardType = UIKeyboardType.EmailAddress
 		case AuthType.Screenname.toRaw():
 			usernameField!.placeholder = "Screen name"

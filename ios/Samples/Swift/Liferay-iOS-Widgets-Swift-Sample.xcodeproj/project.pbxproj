@@ -22,7 +22,15 @@
 		882C92F71987898D005D5400 /* login-lock-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 882C92F31987898D005D5400 /* login-lock-icon@2x.png */; };
 		882C92F81987898D005D5400 /* login-user-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 882C92F41987898D005D5400 /* login-user-icon.png */; };
 		882C92F91987898D005D5400 /* login-user-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 882C92F51987898D005D5400 /* login-user-icon@2x.png */; };
+		882C930419879E46005D5400 /* theme-default.png in Resources */ = {isa = PBXBuildFile; fileRef = 882C930319879E46005D5400 /* theme-default.png */; };
 		8835607C196AED36002AB222 /* liferay-context-sample.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8835607B196AED36002AB222 /* liferay-context-sample.plist */; };
+		8859E6241987AE3C00885B94 /* theme-color.png in Resources */ = {isa = PBXBuildFile; fileRef = 8859E6231987AE3C00885B94 /* theme-color.png */; };
+		8859E6291987B23600885B94 /* theme-dark.png in Resources */ = {isa = PBXBuildFile; fileRef = 8859E6271987B23600885B94 /* theme-dark.png */; };
+		8859E62A1987B23600885B94 /* theme-flat.png in Resources */ = {isa = PBXBuildFile; fileRef = 8859E6281987B23600885B94 /* theme-flat.png */; };
+		8859E65B1987D58400885B94 /* theme-default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8859E65A1987D58400885B94 /* theme-default@2x.png */; };
+		8859E6801987E28D00885B94 /* ny.png in Resources */ = {isa = PBXBuildFile; fileRef = 8859E67E1987E28D00885B94 /* ny.png */; };
+		8859E6811987E28D00885B94 /* ny@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8859E67F1987E28D00885B94 /* ny@2x.png */; };
+		8859E68C1987EDBD00885B94 /* NSBundle+Localization.m in Sources */ = {isa = PBXBuildFile; fileRef = 8859E68B1987EDBD00885B94 /* NSBundle+Localization.m */; };
 		8868AFCC19656B0500FD5214 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8868AFCB19656B0500FD5214 /* AppDelegate.swift */; };
 		8868AFCE19656B0500FD5214 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8868AFCD19656B0500FD5214 /* ViewController.swift */; };
 		8868AFD119656B0500FD5214 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8868AFCF19656B0500FD5214 /* Main.storyboard */; };
@@ -56,7 +64,16 @@
 		882C92F31987898D005D5400 /* login-lock-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "login-lock-icon@2x.png"; sourceTree = "<group>"; };
 		882C92F41987898D005D5400 /* login-user-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "login-user-icon.png"; sourceTree = "<group>"; };
 		882C92F51987898D005D5400 /* login-user-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "login-user-icon@2x.png"; sourceTree = "<group>"; };
+		882C930319879E46005D5400 /* theme-default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "theme-default.png"; sourceTree = "<group>"; };
 		8835607B196AED36002AB222 /* liferay-context-sample.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "liferay-context-sample.plist"; sourceTree = "<group>"; };
+		8859E6231987AE3C00885B94 /* theme-color.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "theme-color.png"; sourceTree = "<group>"; };
+		8859E6271987B23600885B94 /* theme-dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "theme-dark.png"; sourceTree = "<group>"; };
+		8859E6281987B23600885B94 /* theme-flat.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "theme-flat.png"; sourceTree = "<group>"; };
+		8859E65A1987D58400885B94 /* theme-default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "theme-default@2x.png"; sourceTree = "<group>"; };
+		8859E67E1987E28D00885B94 /* ny.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ny.png; path = ../../../../../../../Desktop/ny.png; sourceTree = "<group>"; };
+		8859E67F1987E28D00885B94 /* ny@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "ny@2x.png"; path = "../../../../../../../Desktop/ny@2x.png"; sourceTree = "<group>"; };
+		8859E68A1987EDBD00885B94 /* NSBundle+Localization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSBundle+Localization.h"; sourceTree = "<group>"; };
+		8859E68B1987EDBD00885B94 /* NSBundle+Localization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSBundle+Localization.m"; sourceTree = "<group>"; };
 		8868AFC619656B0500FD5214 /* Liferay-iOS-Widgets-Swift-Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Liferay-iOS-Widgets-Swift-Sample.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8868AFCA19656B0500FD5214 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8868AFCB19656B0500FD5214 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -88,20 +105,39 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		882C92FA19879A61005D5400 /* Mockup */ = {
+			isa = PBXGroup;
+			children = (
+				882C930319879E46005D5400 /* theme-default.png */,
+				8859E65A1987D58400885B94 /* theme-default@2x.png */,
+				8859E6231987AE3C00885B94 /* theme-color.png */,
+				8859E6271987B23600885B94 /* theme-dark.png */,
+				8859E6281987B23600885B94 /* theme-flat.png */,
+			);
+			path = Mockup;
+			sourceTree = "<group>";
+		};
 		8835607A196AED0E002AB222 /* Liferay-Widget-Library */ = {
 			isa = PBXGroup;
 			children = (
+				8859E63E1987C7B300885B94 /* Themes */,
 				88832F8719656B3F00E3DF9F /* Source */,
-				88A4AA92198518110052AD79 /* Resources */,
 			);
 			name = "Liferay-Widget-Library";
+			sourceTree = "<group>";
+		};
+		8859E63E1987C7B300885B94 /* Themes */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Themes;
 			sourceTree = "<group>";
 		};
 		8868AFBD19656B0500FD5214 = {
 			isa = PBXGroup;
 			children = (
 				8835607A196AED0E002AB222 /* Liferay-Widget-Library */,
-				8868AFC819656B0500FD5214 /* Liferay-iOS-Widgets-Swift-Sample */,
+				8868AFC819656B0500FD5214 /* Sample App */,
 				8868AFC719656B0500FD5214 /* Products */,
 				6CDED001B92C49429A1F0D49 /* Pods.xcconfig */,
 				F05CF7C2287C4AE6A3C1F243 /* Frameworks */,
@@ -116,9 +152,11 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		8868AFC819656B0500FD5214 /* Liferay-iOS-Widgets-Swift-Sample */ = {
+		8868AFC819656B0500FD5214 /* Sample App */ = {
 			isa = PBXGroup;
 			children = (
+				8859E67E1987E28D00885B94 /* ny.png */,
+				8859E67F1987E28D00885B94 /* ny@2x.png */,
 				88832F9019656B3F00E3DF9F /* liferay-context.plist */,
 				8868AFCB19656B0500FD5214 /* AppDelegate.swift */,
 				8868AFCD19656B0500FD5214 /* ViewController.swift */,
@@ -126,6 +164,7 @@
 				8868AFD219656B0500FD5214 /* Images.xcassets */,
 				8868AFC919656B0500FD5214 /* Supporting Files */,
 			);
+			name = "Sample App";
 			path = "Liferay-iOS-Widgets-Swift-Sample";
 			sourceTree = "<group>";
 		};
@@ -143,6 +182,7 @@
 				88832F8819656B3F00E3DF9F /* Base */,
 				88832F9219656B3F00E3DF9F /* Login */,
 				88832F9619656B3F00E3DF9F /* Util */,
+				88A4AA92198518110052AD79 /* Resources */,
 				8835607B196AED36002AB222 /* liferay-context-sample.plist */,
 				88832F9119656B3F00E3DF9F /* liferay-ios-widgets.h */,
 			);
@@ -175,6 +215,8 @@
 		88832F9619656B3F00E3DF9F /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				8859E68A1987EDBD00885B94 /* NSBundle+Localization.h */,
+				8859E68B1987EDBD00885B94 /* NSBundle+Localization.m */,
 				88832F9719656B3F00E3DF9F /* nameOfClass.swift */,
 			);
 			path = Util;
@@ -183,10 +225,11 @@
 		88A4AA92198518110052AD79 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				882C92FA19879A61005D5400 /* Mockup */,
 				88A4AA93198518110052AD79 /* Login */,
 			);
 			name = Resources;
-			path = ../../Library/Resources;
+			path = ../Resources;
 			sourceTree = "<group>";
 		};
 		88A4AA93198518110052AD79 /* Login */ = {
@@ -261,6 +304,7 @@
 			knownRegions = (
 				en,
 				Base,
+				es,
 			);
 			mainGroup = 8868AFBD19656B0500FD5214;
 			productRefGroup = 8868AFC719656B0500FD5214 /* Products */;
@@ -277,7 +321,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8859E62A1987B23600885B94 /* theme-flat.png in Resources */,
 				882C92DB198787FF005D5400 /* login-field-focused@2x.png in Resources */,
+				8859E65B1987D58400885B94 /* theme-default@2x.png in Resources */,
+				8859E6811987E28D00885B94 /* ny@2x.png in Resources */,
 				882C92E3198787FF005D5400 /* login-mail-icon@2x.png in Resources */,
 				8868AFD119656B0500FD5214 /* Main.storyboard in Resources */,
 				882C92DD198787FF005D5400 /* login-field@2x.png in Resources */,
@@ -285,13 +332,17 @@
 				8835607C196AED36002AB222 /* liferay-context-sample.plist in Resources */,
 				882C92F71987898D005D5400 /* login-lock-icon@2x.png in Resources */,
 				882C92DC198787FF005D5400 /* login-field.png in Resources */,
+				8859E6291987B23600885B94 /* theme-dark.png in Resources */,
 				882C92DE198787FF005D5400 /* login-large-button-selected.png in Resources */,
 				882C92E2198787FF005D5400 /* login-mail-icon.png in Resources */,
 				882C92E1198787FF005D5400 /* login-large-button@2x.png in Resources */,
+				882C930419879E46005D5400 /* theme-default.png in Resources */,
 				882C92E0198787FF005D5400 /* login-large-button.png in Resources */,
 				882C92F61987898D005D5400 /* login-lock-icon.png in Resources */,
+				8859E6241987AE3C00885B94 /* theme-color.png in Resources */,
 				88832FA019656B3F00E3DF9F /* LoginView.xib in Resources */,
 				882C92DF198787FF005D5400 /* login-large-button-selected@2x.png in Resources */,
+				8859E6801987E28D00885B94 /* ny.png in Resources */,
 				882C92F81987898D005D5400 /* login-user-icon.png in Resources */,
 				882C92DA198787FF005D5400 /* login-field-focused.png in Resources */,
 				882C92F91987898D005D5400 /* login-user-icon@2x.png in Resources */,
@@ -339,6 +390,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8859E68C1987EDBD00885B94 /* NSBundle+Localization.m in Sources */,
 				88832FA119656B3F00E3DF9F /* LoginWidget.swift in Sources */,
 				8868AFCE19656B0500FD5214 /* ViewController.swift in Sources */,
 				8868AFCC19656B0500FD5214 /* AppDelegate.swift in Sources */,
@@ -449,6 +501,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"COCOAPODS=1",
+					RUNNING,
+				);
 				INFOPLIST_FILE = "Liferay-iOS-Widgets-Swift-Sample/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";

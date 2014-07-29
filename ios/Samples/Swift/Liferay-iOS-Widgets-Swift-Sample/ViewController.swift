@@ -26,14 +26,18 @@ class ViewController: UIViewController, LoginWidgetDelegate {
 
 		// WORKAROUND!
 		// Delegate assignment in IB doesn't work!!
-		loginWidget.delegate = self
-        loginWidget.setAuthType(AuthType.Email)
+		if loginWidget {
+			loginWidget.delegate = self
+    	    loginWidget.setAuthType(AuthType.Email)
 
-		if LoginWidget.storedSession() {
-			loginWidget.hidden = true
-		}
-		else {
-			loginWidget.becomeFirstResponder()
+			/*
+			if LoginWidget.storedSession() {
+				loginWidget.hidden = true
+			}
+			else {
+				loginWidget.becomeFirstResponder()
+			}
+*/
 		}
 	}
 
@@ -57,7 +61,7 @@ class ViewController: UIViewController, LoginWidgetDelegate {
  		println("Error -> " + error.description)
 	}
 
-	func onLoginResponse(attributes: [String:AnyObject!])  {
+	func onLoginResponse(attributes: [String:AnyObject])  {
 		NSLog("Login %@", attributes)
 	}
 

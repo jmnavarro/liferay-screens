@@ -12,10 +12,11 @@
 * details.
 */
 import UIKit
+import QuartzCore
 
 @objc protocol LoginWidgetDelegate {
 
-	optional func onLoginResponse(attributes: [String:AnyObject!])
+	optional func onLoginResponse(attributes: [String:AnyObject])
 	optional func onLoginError(error: NSError)
 
 	optional func onCredentialsSaved(session:LRSession)
@@ -23,10 +24,13 @@ import UIKit
 
 }
 
-class LoginWidget: BaseWidget {
+@IBDesignable class LoginWidget: BaseWidget {
 
     @IBOutlet var delegate: LoginWidgetDelegate?
-    
+
+
+	@IBInspectable var AutoSave:Bool? = true
+
 	public class func storedSession() -> LRSession? {
 		return LRSession.sessionFromStoredCredential()
 	}
@@ -50,19 +54,23 @@ class LoginWidget: BaseWidget {
     // BaseWidget METHODS
 
 	override public func onCreate() {
-        setAuthType(AuthType.Email)
-
 		if let session = LRSession.sessionFromStoredCredential() {
-			LiferayContext.instance.currentSession = session
-
-			loginView().usernameField!.text = session.username
-			loginView().passwordField!.text = session.password
-
-			delegate?.onCredentialsLoaded?(session)
+			if let autoSaveValue = AutoSave {
+				if autoSaveValue {
+					LiferayContext.instance.currentSession = session
+/*
+					loginView().usernameField!.text = session.username
+					loginView().passwordField!.text = session.password
+*/
+					delegate?.onCredentialsLoaded?(session)
+				}
+			}
 		}
 		else {
-			loginView().usernameField!.text = "test@liferay.com"
+//			loginView().usernameField!.text = "test@liferay.com"
 		}
+
+		setAuthType(AuthType.Email)
 	}
 
 	override public func onCustomAction(actionName: String?, sender: UIControl) {
@@ -80,12 +88,14 @@ class LoginWidget: BaseWidget {
         hideHUDWithMessage("Error signing in!", details: nil)
     }
     
-	override public func onServerResult(result: [String:AnyObject!]) {
+	override public func onServerResult(result: [String:AnyObject]) {
 		delegate?.onLoginResponse?(result)
 
-		if loginView().shouldRememberCredentials {
-			if LiferayContext.instance.currentSession!.storeCredential() {
+		if let autoSaveValue = AutoSave /*loginView().shouldRememberCredentials*/ {
+			if autoSaveValue {
+				if LiferayContext.instance.currentSession!.storeCredential() {
 				delegate?.onCredentialsSaved?(LiferayContext.instance.currentSession!)
+				}
 			}
         }
         
