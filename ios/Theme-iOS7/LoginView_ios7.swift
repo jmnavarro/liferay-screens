@@ -15,8 +15,25 @@ import UIKit
 
 class LoginView_ios7: LoginView {
 
+	@IBOutlet var titleLabel: UILabel?
+	@IBOutlet var subtitleLabel: UILabel?
 	@IBOutlet var usernamePlaceholder: UILabel?
 	@IBOutlet var passwordPlaceholder: UILabel?
+
+	override public func setTranslations(bundle:NSBundle) {
+		super.setTranslations(bundle)
+
+		titleLabel!.text = NSLocalizedString("theme-ios7-login-title", tableName: "ios7", bundle: bundle, value: "", comment: "")
+		subtitleLabel!.text = NSLocalizedString("theme-ios7-login-subtitle", tableName: "ios7", bundle: bundle, value: "", comment: "")
+		usernamePlaceholder!.text = NSLocalizedString("theme-ios7-login-email", tableName: "ios7", bundle: bundle, value: "", comment: "")
+		passwordPlaceholder!.text = NSLocalizedString("theme-ios7-login-password", tableName: "ios7", bundle: bundle, value: "", comment: "")
+
+		let str = loginButton!.attributedTitleForState(UIControlState.Normal)
+		let translated = NSLocalizedString("theme-ios7-login-login", tableName: "ios7", bundle: bundle, value: "", comment: "")
+		let newStr = NSMutableAttributedString(attributedString: str)
+		newStr.replaceCharactersInRange(NSMakeRange(0, str.length), withString:translated)
+		loginButton!.setAttributedTitle(newStr, forState: UIControlState.Normal)
+	}
 
 	func textField(textField: UITextField!, shouldChangeCharactersInRange range: NSRange, replacementString string: String!) -> Bool {
 
@@ -31,29 +48,13 @@ class LoginView_ios7: LoginView {
 	}
 
 	private func showPlaceholder(placeholder:UILabel, show:Bool) {
-		UIView.animateWithDuration(0.3, animations: {
+		UIView.animateWithDuration(0.4, animations: {
 			placeholder.alpha = show ? 1.0 : 0.0
 		})
 	}
 
 	override func setAuthType(authType: String) {
 		super.setAuthType(authType)
-
-		usernameField!.text = "";
-
-		if usernameField!.text != "" {
-			usernamePlaceholder!.text = ""
-		}
-		else {
-			usernamePlaceholder!.text = usernameField!.placeholder;
-		}
-
-		if passwordField!.text != "" {
-			passwordPlaceholder!.text = ""
-		}
-		else {
-			passwordPlaceholder!.text = passwordField!.placeholder;
-		}
 
 		usernameField!.placeholder = "";
 		passwordField!.placeholder = "";

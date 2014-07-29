@@ -1,7 +1,7 @@
-"theme-ios7-login-title"="Welcome";
+"theme-ios7-login-title"="¡Bienvenido!";
 "theme-ios7-login-subtitle"="Lorem ipsum dolor sit amet, consectetur adipisicing elit.\nDonec auctor neque sed pretium luctus.";
-"theme-ios7-login-email"="Email Address";
-"theme-ios7-login-password"="Password";
-"theme-ios7-login-login"="Login";
+"theme-ios7-login-email"="Dirección de correo";
+"theme-ios7-login-password"="Contraseña";
+"theme-ios7-login-login"="Entrar";
 
 
