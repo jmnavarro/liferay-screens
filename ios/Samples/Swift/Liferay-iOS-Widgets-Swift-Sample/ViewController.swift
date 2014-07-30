@@ -15,7 +15,7 @@ import UIKit
 
 class ViewController: UIViewController, LoginWidgetDelegate {
 
-	@IBOutlet var loginWidget: LoginWidget!
+	@IBOutlet var widget: LoginWidget?
 
     
     // UIViewController METHODS
@@ -26,9 +26,10 @@ class ViewController: UIViewController, LoginWidgetDelegate {
 
 		// WORKAROUND!
 		// Delegate assignment in IB doesn't work!!
-		if loginWidget {
-			loginWidget.delegate = self
-    	    loginWidget.setAuthType(AuthType.Email)
+		if widget {
+			widget!.delegate = self
+			widget!.setAuthType(AuthType.Email)
+		}
 
 			/*
 			if LoginWidget.storedSession() {
@@ -38,7 +39,6 @@ class ViewController: UIViewController, LoginWidgetDelegate {
 				loginWidget.becomeFirstResponder()
 			}
 */
-		}
 	}
 
 	override func didReceiveMemoryWarning() {

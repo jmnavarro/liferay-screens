@@ -24,12 +24,9 @@ import QuartzCore
 
 }
 
-@IBDesignable class LoginWidget: BaseWidget {
+class LoginWidget: BaseWidget {
 
     @IBOutlet var delegate: LoginWidgetDelegate?
-
-
-	@IBInspectable var AutoSave:Bool? = true
 
 	public class func storedSession() -> LRSession? {
 		return LRSession.sessionFromStoredCredential()
@@ -55,16 +52,13 @@ import QuartzCore
 
 	override public func onCreate() {
 		if let session = LRSession.sessionFromStoredCredential() {
-			if let autoSaveValue = AutoSave {
-				if autoSaveValue {
-					LiferayContext.instance.currentSession = session
 /*
-					loginView().usernameField!.text = session.username
-					loginView().passwordField!.text = session.password
+			LiferayContext.instance.currentSession = session
+
+			loginView().usernameField!.text = session.username
+			loginView().passwordField!.text = session.password
+			delegate?.onCredentialsLoaded?(session)
 */
-					delegate?.onCredentialsLoaded?(session)
-				}
-			}
 		}
 		else {
 //			loginView().usernameField!.text = "test@liferay.com"
@@ -87,15 +81,14 @@ import QuartzCore
 
         hideHUDWithMessage("Error signing in!", details: nil)
     }
-    
+	
 	override public func onServerResult(result: [String:AnyObject]) {
+		NSLog((result as NSDictionary).description)
 		delegate?.onLoginResponse?(result)
 
-		if let autoSaveValue = AutoSave /*loginView().shouldRememberCredentials*/ {
-			if autoSaveValue {
-				if LiferayContext.instance.currentSession!.storeCredential() {
+		if loginView().shouldRememberCredentials {
+			if LiferayContext.instance.currentSession!.storeCredential() {
 				delegate?.onCredentialsSaved?(LiferayContext.instance.currentSession!)
-				}
 			}
         }
         

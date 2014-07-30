@@ -28,8 +28,6 @@
 		8859E6291987B23600885B94 /* theme-dark.png in Resources */ = {isa = PBXBuildFile; fileRef = 8859E6271987B23600885B94 /* theme-dark.png */; };
 		8859E62A1987B23600885B94 /* theme-flat.png in Resources */ = {isa = PBXBuildFile; fileRef = 8859E6281987B23600885B94 /* theme-flat.png */; };
 		8859E65B1987D58400885B94 /* theme-default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8859E65A1987D58400885B94 /* theme-default@2x.png */; };
-		8859E6801987E28D00885B94 /* ny.png in Resources */ = {isa = PBXBuildFile; fileRef = 8859E67E1987E28D00885B94 /* ny.png */; };
-		8859E6811987E28D00885B94 /* ny@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8859E67F1987E28D00885B94 /* ny@2x.png */; };
 		8859E68C1987EDBD00885B94 /* NSBundle+Localization.m in Sources */ = {isa = PBXBuildFile; fileRef = 8859E68B1987EDBD00885B94 /* NSBundle+Localization.m */; };
 		8868AFCC19656B0500FD5214 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8868AFCB19656B0500FD5214 /* AppDelegate.swift */; };
 		8868AFCE19656B0500FD5214 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8868AFCD19656B0500FD5214 /* ViewController.swift */; };
@@ -70,8 +68,6 @@
 		8859E6271987B23600885B94 /* theme-dark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "theme-dark.png"; sourceTree = "<group>"; };
 		8859E6281987B23600885B94 /* theme-flat.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "theme-flat.png"; sourceTree = "<group>"; };
 		8859E65A1987D58400885B94 /* theme-default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "theme-default@2x.png"; sourceTree = "<group>"; };
-		8859E67E1987E28D00885B94 /* ny.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ny.png; path = ../../../../../../../Desktop/ny.png; sourceTree = "<group>"; };
-		8859E67F1987E28D00885B94 /* ny@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "ny@2x.png"; path = "../../../../../../../Desktop/ny@2x.png"; sourceTree = "<group>"; };
 		8859E68A1987EDBD00885B94 /* NSBundle+Localization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSBundle+Localization.h"; sourceTree = "<group>"; };
 		8859E68B1987EDBD00885B94 /* NSBundle+Localization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSBundle+Localization.m"; sourceTree = "<group>"; };
 		8868AFC619656B0500FD5214 /* Liferay-iOS-Widgets-Swift-Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Liferay-iOS-Widgets-Swift-Sample.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -155,8 +151,6 @@
 		8868AFC819656B0500FD5214 /* Sample App */ = {
 			isa = PBXGroup;
 			children = (
-				8859E67E1987E28D00885B94 /* ny.png */,
-				8859E67F1987E28D00885B94 /* ny@2x.png */,
 				88832F9019656B3F00E3DF9F /* liferay-context.plist */,
 				8868AFCB19656B0500FD5214 /* AppDelegate.swift */,
 				8868AFCD19656B0500FD5214 /* ViewController.swift */,
@@ -324,7 +318,6 @@
 				8859E62A1987B23600885B94 /* theme-flat.png in Resources */,
 				882C92DB198787FF005D5400 /* login-field-focused@2x.png in Resources */,
 				8859E65B1987D58400885B94 /* theme-default@2x.png in Resources */,
-				8859E6811987E28D00885B94 /* ny@2x.png in Resources */,
 				882C92E3198787FF005D5400 /* login-mail-icon@2x.png in Resources */,
 				8868AFD119656B0500FD5214 /* Main.storyboard in Resources */,
 				882C92DD198787FF005D5400 /* login-field@2x.png in Resources */,
@@ -342,7 +335,6 @@
 				8859E6241987AE3C00885B94 /* theme-color.png in Resources */,
 				88832FA019656B3F00E3DF9F /* LoginView.xib in Resources */,
 				882C92DF198787FF005D5400 /* login-large-button-selected@2x.png in Resources */,
-				8859E6801987E28D00885B94 /* ny.png in Resources */,
 				882C92F81987898D005D5400 /* login-user-icon.png in Resources */,
 				882C92DA198787FF005D5400 /* login-field-focused.png in Resources */,
 				882C92F91987898D005D5400 /* login-user-icon@2x.png in Resources */,
