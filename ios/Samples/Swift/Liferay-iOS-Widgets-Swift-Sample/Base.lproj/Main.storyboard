@@ -44,10 +44,6 @@
                                 <rect key="frame" x="20" y="20" width="280" height="303"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="creatorUsername" value="jose.navarro@liferay.com"/>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="creatorPassword" value="jm"/>
-                                </userDefinedRuntimeAttributes>
                             </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
