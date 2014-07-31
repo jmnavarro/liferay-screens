@@ -91,7 +91,7 @@ import UIKit
 		switch authType {
 		case AuthType.Email:
 			creatingUsername = signUpView().emailAddressField!.text
-		case AuthType.Screenname:
+		case AuthType.ScreenName:
 			creatingUsername = signUpView().screenNameField!.text
 		case AuthType.UserId:
 			println("ERROR: sign Up with User id is not supported")

@@ -13,7 +13,12 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" id="XU3-jd-mfY" customClass="LoginWidget" customModule="Liferay_iOS_Widgets_Swift_Sample" customModuleProvider="target">
-                                <rect key="frame" x="20" y="20" width="280" height="490"/>
+                                <rect key="frame" x="20" y="20" width="280" height="220"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
+                            <view contentMode="scaleToFill" id="gPw-ph-bWR" customClass="ForgotPasswordWidget" customModule="Liferay_iOS_Widgets_Swift_Sample" customModuleProvider="target">
+                                <rect key="frame" x="20" y="250" width="280" height="220"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
@@ -36,7 +41,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" id="5KW-5B-P9g" customClass="SignUpWidget" customModule="Liferay_iOS_Widgets_Swift_Sample" customModuleProvider="target">
-                                <rect key="frame" x="51" y="35" width="218" height="303"/>
+                                <rect key="frame" x="20" y="20" width="280" height="303"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <userDefinedRuntimeAttributes>
