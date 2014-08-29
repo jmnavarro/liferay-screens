@@ -47,7 +47,7 @@ import UIKit
 
 	private var userId:Int = 0
 
-	private var currentOperation:FormOperation = .Idle
+	private var currentOperation = FormOperation.Loading
 
 
 	// MARK: BaseWidget METHODS
@@ -89,17 +89,10 @@ import UIKit
 				finishOperationWithMessage("An error happened loading form")
 
 			case .Uploading(let document):
-				document.uploadStatus = .Failed(error)
+				onUploadError(error, document:document)
 
-				formView().changeDocumentUploadStatus(document)
-
-				if !document.validate() {
-					formView().showElement(document)
-				}
-
-				delegate?.onDocumentUploadError?(document, error: error)
-
-				showHUDWithMessage("An error happened uploading file", details: nil, secondsToShow: 3.0)
+			case .UploadingThenSubmit(let document):
+				onUploadError(error, document:document)
 
 			default: ()
 		}
@@ -114,21 +107,45 @@ import UIKit
 					recordId = recordIdValue
 				}
 				finishOperationWithMessage("Form submitted")
+				currentOperation = .Idle
 
 			case .Loading:
 				onFormLoadResult(result)
+				currentOperation = .Idle
 
 			case .Uploading(let document):
-				document.uploadStatus = .Uploaded(result)
+				onUploadResult(result, document:document)
+				currentOperation = .Idle
 
-				formView().changeDocumentUploadStatus(document)
-
-				delegate?.onDocumentUploadCompleted?(document, result: result)
+			case .UploadingThenSubmit(let document):
+				onUploadResult(result, document:document)
+				submitForm()
 
 			default: ()
 		}
 
-		currentOperation = .Idle
+	}
+
+	private func onUploadError(error:NSError, document:DDLElementDocument) {
+		document.uploadStatus = .Failed(error)
+
+		formView().changeDocumentUploadStatus(document)
+
+		if !document.validate() {
+			formView().showElement(document)
+		}
+
+		delegate?.onDocumentUploadError?(document, error: error)
+
+		showHUDWithMessage("An error happened uploading file", details: nil, secondsToShow: 3.0)
+	}
+
+	private func onUploadResult(result:[String:AnyObject], document:DDLElementDocument) {
+		document.uploadStatus = .Uploaded(result)
+
+		formView().changeDocumentUploadStatus(document)
+
+		delegate?.onDocumentUploadCompleted?(document, result: result)
 	}
 
 	private func onFormLoadResult(result: [String:AnyObject]) {
@@ -168,14 +185,14 @@ import UIKit
 			return false
 		}
 
+		currentOperation = .Loading
+
 		startOperationWithMessage("Loading form...", details: "Wait a second...")
 
 		let session = LRSession(session: LiferayContext.instance.currentSession)
 		session.callback = self
 
 		let service = LRDDMStructureService_v62(session: session)
-
-		currentOperation = .Loading
 
 		var outError: NSError?
 
@@ -203,6 +220,19 @@ import UIKit
 		if userId == 0 {
 			println("ERROR: UserId is empty. Can't submit form without loading the form before")
 			return false
+		}
+
+		switch currentOperation {
+			case .Uploading(let doc):
+				currentOperation = .UploadingThenSubmit(doc)
+				showHUDWithMessage("Uploading file...", details: "Wait a second...")
+				return true
+
+			case .Loading, .Submitting:
+				println("ERROR: Cannot submit form while it's being loading or submitting")
+				return false
+
+			default: ()
 		}
 
 		if !formView().validateForm(autoscroll:autoscrollOnValidation) {
@@ -324,4 +354,5 @@ private enum FormOperation {
 	case Loading
 	case Submitting
 	case Uploading(DDLElementDocument)
+	case UploadingThenSubmit(DDLElementDocument)
 }
