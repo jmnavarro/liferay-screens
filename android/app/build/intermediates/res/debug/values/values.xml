@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- From: file:/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/values/attrs_base_widget.xml -->
+    <eat-comment />
+
+    <declare-styleable name="Base">
+        <attr name="custom_layout" format="string" />
+    </declare-styleable>
+    <!-- From: file:/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/values/attrs_journal_article_widget.xml -->
+    <eat-comment />
+
+    <declare-styleable name="JournalArticleWidget">
+        <attr name="custom_layout" />
+        <attr name="groupId" format="integer" />
+        <attr name="articleId" format="integer" />
+    </declare-styleable>
+    <!-- From: file:/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/values/attrs_login_widget.xml -->
+    <eat-comment />
+
+    <declare-styleable name="LoginWidget">
+        <attr name="custom_layout" />
+    </declare-styleable>
+    <!-- From: file:/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/values/strings.xml -->
+    <eat-comment />
+
+    <string name="app_name">LiferayMobileWidgets</string>
+    <!-- From: file:/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/values/styles.xml -->
+    <eat-comment />
+
+    <style name="AppBaseTheme" parent="android:Theme.Light">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        -->
+    </style>
+
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>
+
+</resources>

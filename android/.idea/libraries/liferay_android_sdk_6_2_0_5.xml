@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="liferay-android-sdk-6.2.0.5">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/app/libs/liferay-android-sdk-6.2.0.5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

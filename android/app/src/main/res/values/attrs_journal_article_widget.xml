@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="JournalArticleWidget">
+        <attr name="custom_layout" />
+        
+        <attr name="groupId" format="integer" />
+        <attr name="articleId" format="integer" />
+	</declare-styleable>
+</resources>

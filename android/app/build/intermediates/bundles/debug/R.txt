@@ -1,0 +1,23 @@
+int attr articleId 0x7f010002
+int attr custom_layout 0x7f010000
+int attr groupId 0x7f010001
+int drawable ic_launcher 0x7f020000
+int id emailEditText 0x7f060002
+int id emailTextView 0x7f060001
+int id journalArticleWidget1 0x7f060000
+int id loginButton 0x7f060005
+int id passwordEditText 0x7f060004
+int id passwordTextView 0x7f060003
+int layout journal_article_widget 0x7f030000
+int layout login_widget 0x7f030001
+int string app_name 0x7f040000
+int style AppBaseTheme 0x7f050000
+int style AppTheme 0x7f050001
+int[] styleable Base { 0x7f010000 }
+int styleable Base_custom_layout 0
+int[] styleable JournalArticleWidget { 0x7f010000, 0x7f010001, 0x7f010002 }
+int styleable JournalArticleWidget_articleId 2
+int styleable JournalArticleWidget_custom_layout 0
+int styleable JournalArticleWidget_groupId 1
+int[] styleable LoginWidget { 0x7f010000 }
+int styleable LoginWidget_custom_layout 0

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="2" >
+
+    <dataSet config="21.0.0-rc1" >
+        <source path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.0-rc1/res" />
+    </dataSet>
+    <dataSet config="main" >
+        <source path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res" >
+            <file
+                name="ic_launcher"
+                path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/drawable-hdpi/ic_launcher.png"
+                qualifiers="hdpi-v4"
+                type="drawable" />
+            <file
+                name="ic_launcher"
+                path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/drawable-mdpi/ic_launcher.png"
+                qualifiers="mdpi-v4"
+                type="drawable" />
+            <file
+                name="ic_launcher"
+                path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/drawable-xhdpi/ic_launcher.png"
+                qualifiers="xhdpi-v4"
+                type="drawable" />
+            <file
+                name="journal_article_widget"
+                path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/layout/journal_article_widget.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="login_widget"
+                path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/layout/login_widget.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/values/attrs_base_widget.xml"
+                qualifiers="" >
+                <declare-styleable name="Base" >
+                    <attr
+                        name="custom_layout"
+                        format="string" />
+                </declare-styleable>
+            </file>
+            <file
+                path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/values/attrs_journal_article_widget.xml"
+                qualifiers="" >
+                <declare-styleable name="JournalArticleWidget" >
+                    <attr name="custom_layout" />
+                    <attr
+                        name="groupId"
+                        format="integer" />
+                    <attr
+                        name="articleId"
+                        format="integer" />
+                </declare-styleable>
+            </file>
+            <file
+                path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/values/attrs_login_widget.xml"
+                qualifiers="" >
+                <declare-styleable name="LoginWidget" >
+                    <attr name="custom_layout" />
+                </declare-styleable>
+            </file>
+            <file
+                path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/values/strings.xml"
+                qualifiers="" >
+                <string name="app_name" >LiferayMobileWidgets
+                </string>
+            </file>
+            <file
+                path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/values/styles.xml"
+                qualifiers="" >
+
+                <style
+                    name="AppBaseTheme"
+                    parent="android:Theme.Light" >
+
+                    <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+                    -->
+                </style>
+
+                <style
+                    name="AppTheme"
+                    parent="AppBaseTheme" >
+
+                    <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+                </style>
+            </file>
+            <file
+                path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/values-v11/styles.xml"
+                qualifiers="v11" >
+
+                <style
+                    name="AppBaseTheme"
+                    parent="android:Theme.Holo.Light" >
+
+                    <!-- API 11 theme customizations can go here. -->
+                </style>
+            </file>
+            <file
+                path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/main/res/values-v14/styles.xml"
+                qualifiers="v14" >
+
+                <style
+                    name="AppBaseTheme"
+                    parent="android:Theme.Holo.Light.DarkActionBar" >
+
+                    <!-- API 14 theme customizations can go here. -->
+                </style>
+            </file>
+        </source>
+        <source path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/build/generated/res/rs/debug" />
+        <source path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/build/generated/res/generated/debug" />
+    </dataSet>
+    <dataSet config="debug" >
+        <source path="/Users/jm/dev/tools/AndroidStudio.ws/LiferayMobileWidgets/app/src/debug/res" />
+    </dataSet>
+
+</merger>
