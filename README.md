@@ -1,18 +1,62 @@
-# Liferay Mobile Widgets
+# Liferay Screens
+
+[![License](http://img.shields.io/badge/license-LGPL_2.1-red.svg?style=flat-square)](http://opensource.org/licenses/LGPL-2.1)
+
+[![iOS Platform](http://img.shields.io/badge/platform-iOS_7+-blue.svg?style=flat-square)](https://github.com/liferay/liferay-screens/tree/master/ios) [![Build Status](http://img.shields.io/travis/liferay/liferay-screens.svg?style=flat-square)](https://travis-ci.org/liferay/liferay-screens/) [![Release](http://img.shields.io/badge/release-Beta_2-orange.svg?style=flat-square)](https://github.com/liferay/liferay-screens/releases/) [![Tag](http://img.shields.io/github/tag/liferay/liferay-screens.svg?style=flat-square)](https://github.com/liferay/liferay-screens/tags/)
+
+[![Android Platform](http://img.shields.io/badge/platform-Android-green.svg?style=flat-square)](https://github.com/liferay/liferay-screens/tree/master/android) [![Build Status](http://img.shields.io/travis/liferay/liferay-screens.svg?style=flat-square)](https://travis-ci.org/liferay/liferay-screens/) [![Release](http://img.shields.io/badge/release-Alpha-orange.svg?style=flat-square)](https://github.com/liferay/liferay-screens/releases/) 
 
 ## Introduction
-Mobile Widgets is the Liferay's effort to speed up and simplify the development of mobile apps that use Liferay Portal as backend.
 
-It's currently possible to develop mobile apps using [Liferay Mobile SDK](https://github.com/liferay/liferay-mobile-sdk "Liferay Mobile SDK"). Mobile SDK is low-level layer on top of Liferay JSON API, so it means that, besides to your iOS or Android experience, you'll need to know what [Liferay's remote services](https://www.liferay.com/documentation/liferay-portal/6.2/development/-/ai/accessing-services-remotely-liferay-portal-6-2-dev-guide-05-en) are and how to make specific calls to them (some services are trivial, but others could be a bit tricky).
-However, if you already know some of those Liferay concepts, don't hesitate to read [Mobile SDK documentation](https://www.liferay.com/documentation/liferay-portal/6.2/development/-/ai/mobile-sdk-to-call-services-liferay-portal-6-2-dev-guide-en) and check whether it's convenient for your needs.
+Screens is Liferay's effort to speed up and simplify the development of native apps for mobile devices. This may grow to include apps for any of the new categories of smart devices that are currently emerging. Liferay Screens provides a common infrastructure and a family of components called *screenlets* that are connected to the Liferay platform. This allows your mobile applications to leverage the wide variety of server-side features that Liferay already provides.
 
-Mobile widgets aim is to hide all the complexity of calling Liferay remote services, just giving to the developer a set of GUI oriented components (widgets). These widgets will make all the server calls under the hood so you don't have to deal with remote services, JSON responses and weird parameters.
-As developer, you'll be able to customize the UI, hide or extend widget's features, or even override the default behaviour to implement specific features in your project.
+Before Screens, you could leverage those features by developing mobile apps using the [Liferay Mobile SDK](https://www.liferay.com/community/liferay-projects/liferay-mobile-sdk/overview). However, Mobile SDK is a low-level layer on top of the Liferay JSON API. This means that you need to know what [Liferay's remote services](https://www.liferay.com/documentation/liferay-portal/6.2/development/-/ai/accessing-services-remotely-liferay-portal-6-2-dev-guide-05-en) are and how to make specific calls to them. If you already know some of those Liferay concepts, then you may want to take a look at the [Mobile SDK documentation](https://dev.liferay.com/develop/tutorials/-/knowledge_base/6-2/mobile) to check whether it's convenient for your needs.
 
+![App based on Liferay Screens](ios/Documentation/Images/screens-phone.png)
+
+The goal of Screens is to speed up mobile app development by hiding the additional complexity of calling Liferay's remote services. Screens gives you a set of screenlets that make all the server calls under the hood, so you don't have to deal with remote services, JSON responses, or any other seemingly strange parameters. With Screens you're able to customize the UI, hide or extend screenlet's features, or even override the default behavior to implement specific features in your project.
 
 ## iOS
 
-Given that iOS widgets are written for in Swift, and it's currently in Beta version, the process is not as seamless as we'd wish. Instead of release the widgets as a CocoaPods (which is the standard and recommended way), you'll have to include widget's source code into your project. If you have developed apps before CocoaPods appeared, this procedure will be familiar to you. As soon as CocoaPods works fine with Swift, Cocoa frameworks and ObjC-Swift interoperativity, we'll release a Pod to make it easier.
+The implementation of Screens for iOS devices uses standard development tools for iOS, such as Xcode, iOS SDK, iOS Simulator, and others. What's more, Screens can be seamlessly integrated into any of your existing projects. It's developed using the new Swift language and modern development techniques, such as functional Swift code and the [Model View Presenter architecture](http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93presenter). This makes Screens a great way to construct your app in a modular way.
+
+### iOS Quick Start
+
+If you want to add Liferay Screens to your project right away, just jump to the section [Preparing Your Project for Liferay Screens](ios#preparing-your-project-for-liferay-screens).
+
+Once your project is ready, the following screenlets are available for use in your app:
+
+- [`LoginScreenlet`](ios/Documentation/LoginScreenlet.md): Gives your app the ability to sign users in to a Liferay Portal.
+- [`SignUpScreenlet`](ios/Documentation/SignUpScreenlet.md): Gives your app the ability to sign new users in to a Liferay Portal.
+- [`ForgotPasswordScreenlet`](ios/Documentation/ForgotPasswordScreenlet.md): Gives your app the ability to send emails containing a new password or password reset link to users.
+- [`UserPortraitScreenlet`](ios/Documentation/UserPortraitScreenlet.md): Gives your app the ability to show the user's portrait picture.
+- [`DDLFormScreenlet`](ios/Documentation/DDLFormScreenlet.md): Gives your app the ability to present dynamic forms to be filled out by users and submitted back to the server.
+- [`DDLListScreenlet`](ios/Documentation/DDLListScreenlet.md): Gives your app the ability to show a list of records based on a pre-existing [Dynamic Data List](https://dev.liferay.com/discover/portal/-/knowledge_base/6-2/using-web-forms-and-dynamic-data-lists) in a Liferay instance.
+- [`AssetListScreenlet`](ios/Documentation/AssetListScreenlet.md): Shows a list of assets managed by [Liferay's Asset Framework](https://www.liferay.com/documentation/liferay-portal/6.2/development/-/ai/asset-framework-liferay-portal-6-2-dev-guide-06-en). Assets include web content, blog entries, documents and more.
+- [`WebContentDisplayScreenlet`](ios/Documentation/WebContentDisplayScreenlet.md): Shows the HTML of web content. This screenlet uses the features available in [Web Content Management](https://dev.liferay.com/discover/portal/-/knowledge_base/6-2/web-content-management).
+
+You can also check out the [Showcase app](ios/Samples/README.md) to learn how to configure and use the above screenlets.
+
+Liferay Screens for iOS also contains a set of *themes* that you can use to change the UI and UX of the screenlets:
+
+- **Default**: The standard theme that is used when you insert any screenlet in your app's UI. The Default theme can be used as the parent theme for any of your custom themes. Please refer to the [Architecture Guide](ios/Documentation/architecture.md#theme-layer) for more details on this.
+- **Flat7**: A sample theme intended to demonstrate how to develop your own full theme from scratch. Please refer to the [Theme Guide](ios/Documentation/themes.md) for instructions on creating your own theme.
 
 ## Android
-TODO
+
+The implementation of Screens for Android is still in its early stages. Stay tuned!
+
+## Contributing
+
+Liferay welcomes any and all contributions! Please read the [Liferay Screens Contribution Guide](CONTRIBUTING.md) for details on developing and submitting your contributions.
+
+## License
+
+This library is free software ("Licensed Software"); you can redistribute it and/or modify it under the terms of the [GNU Lesser General Public License](http://www.gnu.org/licenses/lgpl-2.1.html) as
+published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; including but not limited to, the implied warranty of MERCHANTABILITY, NONINFRINGEMENT, or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the [GNU Lesser General Public
+License](http://www.gnu.org/licenses/lgpl-2.1.html) along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+Floor, Boston, MA 02110-1301 USA
