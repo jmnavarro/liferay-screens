@@ -69,6 +69,8 @@ class UserPortraitBaseLoadUserInteractor: UserPortraitBaseInteractor {
 		let userOperation = operation as! GetUserBaseOperation
 
 		if let userAttributes = userOperation.resultUserAttributes {
+			self.resultUserId = (userAttributes["userId"] as! NSNumber).longLongValue
+
 			let attributesInteractor = UserPortraitAttributesLoadInteractor(
 					screenlet: screenlet,
 					portraitId: (userAttributes["portraitId"] as! NSNumber).longLongValue,
