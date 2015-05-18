@@ -19,20 +19,19 @@ public class GetSiteTitleInteractor: Interactor {
 		let viewModel = self.screenlet.screenletView as! AddBookmarkViewModel
 
 		if let URL = NSURL(string: viewModel.URL!) {
+			NSURLSession.sharedSession().dataTaskWithURL(URL) {
+				data, response, error in
 
-			let config = NSURLSessionConfiguration.defaultSessionConfiguration()
-			session = NSURLSession(configuration: config)
-
-			session?.dataTaskWithURL(URL) { data, response, error in
 				if let errorValue = error {
 					self.callOnFailure(errorValue)
 				}
 				else {
-					let html = NSString(data: data, encoding: NSUTF8StringEncoding)
-					self.resultTitle = html?.substringToIndex(10)
+					if let html = NSString(data: data, encoding: NSUTF8StringEncoding) {
+						self.resultTitle = self.parseTitle(html)
+					}
 					self.callOnSuccess()
 				}
-			}
+			}.resume()
 
 			// return true to notify the operation is in progress
 			return true
@@ -41,5 +40,14 @@ public class GetSiteTitleInteractor: Interactor {
 		// return false if you cannot start the operation
 		return false
 	}
-   
+
+	private func parseTitle(html: NSString) -> String {
+		let range1 = html.rangeOfString("<title>")
+		let range2 = html.rangeOfString("</title>")
+
+		let start = range1.location + range1.length
+
+		return html.substringWithRange(NSMakeRange(start, range2.location - start))
+	}
+
 }
