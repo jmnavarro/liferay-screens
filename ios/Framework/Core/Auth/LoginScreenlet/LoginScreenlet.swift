@@ -67,7 +67,7 @@ public class LoginScreenlet: BaseScreenlet, AuthBasedType {
 		}
 	}
 
-	override internal func createInteractor(#name: String?, sender: AnyObject?) -> Interactor? {
+	override public func createInteractor(#name: String?, sender: AnyObject?) -> Interactor? {
 		let interactor = LoginInteractor(screenlet: self)
 
 		interactor.onSuccess = {
