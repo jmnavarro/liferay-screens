@@ -40,7 +40,7 @@
                     <fontDescription key="fontDescription" name="HelveticaNeue-Thin" family="Helvetica Neue" pointSize="16"/>
                     <textInputTraits key="textInputTraits" returnKeyType="send" enablesReturnKeyAutomatically="YES"/>
                 </textField>
-                <button opaque="NO" tag="3" contentMode="scaleToFill" restorationIdentifier="login-action" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" hasAttributedTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nJe-Po-XPY">
+                <button opaque="NO" tag="3" contentMode="scaleToFill" restorationIdentifier="add-bookmark" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" hasAttributedTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nJe-Po-XPY">
                     <rect key="frame" x="0.0" y="123" width="228" height="44"/>
                     <color key="backgroundColor" red="0.0" green="0.72156862749999995" blue="0.87843137250000003" alpha="0.87" colorSpace="deviceRGB"/>
                     <constraints>
@@ -63,7 +63,7 @@
                         </userDefinedRuntimeAttribute>
                     </userDefinedRuntimeAttributes>
                 </button>
-                <button opaque="NO" tag="3" contentMode="scaleToFill" restorationIdentifier="get-title" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" hasAttributedTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aOR-xb-ZbV">
+                <button opaque="NO" tag="3" contentMode="scaleToFill" restorationIdentifier="get-title" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" hasAttributedTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aOR-xb-ZbV" userLabel="GET TITLE">
                     <rect key="frame" x="186" y="56" width="38" height="38"/>
                     <color key="backgroundColor" red="0.0" green="0.72156862749999995" blue="0.87843137250000003" alpha="0.87" colorSpace="deviceRGB"/>
                     <constraints>

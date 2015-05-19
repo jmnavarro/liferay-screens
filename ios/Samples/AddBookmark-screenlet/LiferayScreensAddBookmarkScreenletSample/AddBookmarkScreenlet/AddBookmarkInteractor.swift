@@ -8,8 +8,9 @@
 
 import UIKit
 import LiferayScreens
+import LRMobileSDK
 
-public class AddBookmarkInteractor: Interactor {
+public class AddBookmarkInteractor: Interactor, LRCallback {
 
 	public var resultBookmarkInfo: [String:AnyObject]?
 
@@ -17,16 +18,34 @@ public class AddBookmarkInteractor: Interactor {
 		let viewModel = self.screenlet.screenletView as! AddBookmarkViewModel
 
 		if let URL = viewModel.URL {
-			// 1. use MobileSDK's services to send the bookmark to the portal
-			// 3. Save the response in the property 'resultBookmarkInfo'
-			// 4. invoke callOnSuccess() or callOnFailure(error) when everything is done
+			let session = SessionContext.createSessionFromCurrentSession()
+			session?.callback = self
 
-			// return true to notify the operation is in progress
-			return true
+			let service = LRBookmarksEntryService_v62(session: session)
+
+			var error: NSError? = nil
+
+			service.addEntryWithGroupId(LiferayServerContext.groupId,
+					folderId: 0,
+					name: viewModel.title,
+					url: viewModel.URL,
+					description: "Added from Liferay Screens",
+					serviceContext: nil,
+					error: &error)
+
+			return (error == nil)
 		}
 
-		// return false if you cannot start the operation
 		return false
 	}
-   
+
+    public func onFailure(error: NSError!) {
+		self.onFailure?(error)
+	}
+
+    public func onSuccess(result: AnyObject!) {
+		resultBookmarkInfo = (result as! [String:AnyObject])
+		self.onSuccess?()
+	}
+
 }

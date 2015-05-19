@@ -20,7 +20,7 @@ public class GetSiteTitleInteractor: Interactor {
 
 		if let URL = NSURL(string: viewModel.URL!) {
 			NSURLSession.sharedSession().dataTaskWithURL(URL) {
-				data, response, error in
+				(data, response, error) in
 
 				if let errorValue = error {
 					self.callOnFailure(errorValue)
@@ -42,6 +42,7 @@ public class GetSiteTitleInteractor: Interactor {
 	}
 
 	private func parseTitle(html: NSString) -> String {
+		// quick & dirty parse
 		let range1 = html.rangeOfString("<title>")
 		let range2 = html.rangeOfString("</title>")
 
