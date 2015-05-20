@@ -20,24 +20,24 @@ public class LiferayDDLListPageOperation: LiferayPaginationOperation {
 	public var recordSetId: Int64?
 
 	internal var ddlListScreenlet: DDLListScreenlet {
-		return self.screenlet as DDLListScreenlet
+		return self.screenlet as! DDLListScreenlet
 	}
 
 	internal var viewModel: DDLListViewModel {
-		return screenlet.screenletView as DDLListViewModel
+		return screenlet.screenletView as! DDLListViewModel
 	}
 
 	override func validateData() -> Bool {
 		var valid = super.validateData()
 
-		valid &= (recordSetId != nil)
-		valid &= (viewModel.labelFields.count > 0)
+		valid = valid && (recordSetId != nil)
+		valid = valid && (viewModel.labelFields.count > 0)
 
 		return valid
 	}
 
 	override internal func doGetPageRowsOperation(#session: LRBatchSession, page: Int) {
-		let service = LRMobilewidgetsddlrecordService_v62(session: session)
+		let service = LRScreensddlrecordService_v62(session: session)
 
 		if userId == nil {
 			service.getDdlRecordsWithDdlRecordSetId(recordSetId!,
@@ -57,7 +57,7 @@ public class LiferayDDLListPageOperation: LiferayPaginationOperation {
 	}
 
 	override internal func doGetRowCountOperation(#session: LRBatchSession) {
-		let service = LRMobilewidgetsddlrecordService_v62(session: session)
+		let service = LRScreensddlrecordService_v62(session: session)
 
 		if userId == nil {
 			service.getDdlRecordsCountWithDdlRecordSetId(recordSetId!, error: nil)

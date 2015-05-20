@@ -16,9 +16,17 @@ import UIKit
 
 @objc public protocol UserPortraitScreenletDelegate {
 
-	optional func onUserPortraitResponse(image: UIImage) -> UIImage
-	optional func onUserPortraitError(error: NSError)
+	optional func screenlet(screenlet: UserPortraitScreenlet,
+			onUserPortraitResponseImage image: UIImage) -> UIImage
 
+	optional func screenlet(screenlet: UserPortraitScreenlet,
+			onUserPortraitError error: NSError)
+
+	optional func screenlet(screenlet: UserPortraitScreenlet,
+			onUserPortraitUploaded attributes: [String:AnyObject])
+
+	optional func screenlet(screenlet: UserPortraitScreenlet,
+			onUserPortraitUploadError error: NSError)
 }
 
 
@@ -29,18 +37,27 @@ public class UserPortraitScreenlet: BaseScreenlet {
 			(screenletView as? UserPortraitViewModel)?.borderWidth = self.borderWidth
 		}
 	}
+
 	@IBInspectable public var borderColor: UIColor? {
 		didSet {
 			(screenletView as? UserPortraitViewModel)?.borderColor = self.borderColor
 		}
 	}
 
-	@IBOutlet public var delegate: UserPortraitScreenletDelegate?
-
-
-	private var viewModel: UserPortraitViewModel {
-		return screenletView as UserPortraitViewModel
+	@IBInspectable public var editable: Bool = false {
+		didSet {
+			(screenletView as? UserPortraitViewModel)?.editable = self.editable
+		}
 	}
+
+	@IBOutlet public weak var delegate: UserPortraitScreenletDelegate?
+
+
+	public var viewModel: UserPortraitViewModel {
+		return screenletView as! UserPortraitViewModel
+	}
+
+	private var loadedUserId: Int64?
 
 
 	//MARK: BaseScreenlet
@@ -50,11 +67,14 @@ public class UserPortraitScreenlet: BaseScreenlet {
 
 		viewModel.borderWidth = self.borderWidth
 		viewModel.borderColor = self.borderColor
+		viewModel.editable = self.editable
 		viewModel.portraitLoaded = onPortraitLoaded
 	}
 
 	public func loadLoggedUserPortrait() -> Bool {
 		let interactor = UserPortraitLoadLoggedUserInteractor(screenlet: self)
+
+		loadedUserId =  SessionContext.currentUserId
 
 		return startInteractor(interactor)
 	}
@@ -66,6 +86,8 @@ public class UserPortraitScreenlet: BaseScreenlet {
 				uuid: uuid,
 				male: male)
 
+		loadedUserId = nil
+
 		return startInteractor(interactor)
 	}
 
@@ -73,6 +95,8 @@ public class UserPortraitScreenlet: BaseScreenlet {
 		let interactor = UserPortraitLoadByUserIdInteractor(
 				screenlet: self,
 				userId: userId)
+
+		loadedUserId = userId
 
 		return startInteractor(interactor)
 	}
@@ -83,6 +107,8 @@ public class UserPortraitScreenlet: BaseScreenlet {
 				companyId: companyId,
 				emailAddress: emailAddress)
 
+		loadedUserId = nil
+
 		return startInteractor(interactor)
 	}
 
@@ -92,15 +118,57 @@ public class UserPortraitScreenlet: BaseScreenlet {
 				companyId: companyId,
 				screenName: screenName)
 
+		loadedUserId = nil
+
 		return startInteractor(interactor)
 	}
 
+	override internal func createInteractor(#name: String?, sender: AnyObject?) -> Interactor? {
+
+		let interactor: UploadUserPortraitInteractor?
+
+		switch name! {
+		case "upload-portrait":
+			let image = sender as! UIImage
+			let userId: Int64
+
+			if let loadedUserIdValue = loadedUserId {
+				userId = loadedUserIdValue
+			}
+			else {
+				println("ERROR: Can't change the portrait without an userId")
+
+				return nil
+			}
+
+			interactor = UploadUserPortraitInteractor(
+					screenlet: self,
+					userId: userId,
+					image: image)
+
+			interactor!.onSuccess = { [weak interactor] in
+				self.delegate?.screenlet?(self, onUserPortraitUploaded: interactor!.uploadResult!)
+				self.load(userId: userId)
+			}
+
+			interactor!.onFailure = {
+				self.delegate?.screenlet?(self, onUserPortraitUploadError: $0)
+				return
+			}
+
+		default:
+			interactor = nil
+		}
+
+		return interactor
+	}
 
 	//MARK: Private methods
 
 	private func startInteractor(interactor: UserPortraitBaseInteractor) -> Bool {
 		interactor.onSuccess = {
 			self.setPortraitURL(interactor.resultURL)
+			self.loadedUserId = interactor.resultUserId
 		}
 
 		return interactor.start()
@@ -111,7 +179,8 @@ public class UserPortraitScreenlet: BaseScreenlet {
 
 		if url == nil {
 			screenletView?.onFinishOperation()
-			delegate?.onUserPortraitError?(createError(cause: .AbortedDueToPreconditions))
+			delegate?.screenlet?(self,
+					onUserPortraitError: createError(cause: .AbortedDueToPreconditions))
 		}
 	}
 
@@ -119,10 +188,10 @@ public class UserPortraitScreenlet: BaseScreenlet {
 		var finalImage = image
 
 		if let errorValue = error {
-			delegate?.onUserPortraitError?(errorValue)
+			delegate?.screenlet?(self, onUserPortraitError: errorValue)
 		}
 		else if let imageValue = image {
-			finalImage = delegate?.onUserPortraitResponse?(imageValue)
+			finalImage = delegate?.screenlet?(self, onUserPortraitResponseImage: imageValue)
 		}
 
 		screenletView?.onFinishOperation()

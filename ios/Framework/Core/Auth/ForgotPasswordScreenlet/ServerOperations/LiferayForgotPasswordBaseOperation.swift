@@ -33,7 +33,7 @@ public class LiferayForgotPasswordBaseOperation: ServerOperation {
 	}
 
 	internal var viewModel: ForgotPasswordViewModel {
-		return screenlet.screenletView as ForgotPasswordViewModel
+		return screenlet.screenletView as! ForgotPasswordViewModel
 	}
 
 	private var successMessageKey = ""
@@ -64,7 +64,7 @@ public class LiferayForgotPasswordBaseOperation: ServerOperation {
 		var outError: NSError?
 
 		let result = sendForgotPasswordRequest(
-				service: LRMobilewidgetsuserService_v62(session: session),
+				service: LRScreensuserService_v62(session: session),
 				error: &outError)
 
 		if outError != nil {
@@ -85,7 +85,7 @@ public class LiferayForgotPasswordBaseOperation: ServerOperation {
 	//MARK: Template Methods
 	
 	internal func sendForgotPasswordRequest(
-			#service: LRMobilewidgetsuserService_v62,
+			#service: LRScreensuserService_v62,
 			error: NSErrorPointer)
 			-> Bool? {
 

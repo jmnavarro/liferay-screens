@@ -19,7 +19,7 @@ public class LiferayAssetListPageOperation: LiferayPaginationOperation {
 	public var classNameId: Int?
 
 	internal var assetListScreenlet: AssetListScreenlet {
-		return self.screenlet as AssetListScreenlet
+		return self.screenlet as! AssetListScreenlet
 	}
 
 
@@ -28,8 +28,8 @@ public class LiferayAssetListPageOperation: LiferayPaginationOperation {
 	override func validateData() -> Bool {
 		var valid = super.validateData()
 
-		valid &= (groupId != nil)
-		valid &= (classNameId != nil)
+		valid = valid && (groupId != nil)
+		valid = valid && (classNameId != nil)
 
 		return valid
 	}
@@ -38,7 +38,7 @@ public class LiferayAssetListPageOperation: LiferayPaginationOperation {
 	//MARK: LiferayPaginationOperation
 
 	override internal func doGetPageRowsOperation(#session: LRBatchSession, page: Int) {
-		let screenletsService = LRMobilewidgetsassetentryService_v62(session: session)
+		let screenletsService = LRScreensassetentryService_v62(session: session)
 
 		var entryQueryAttributes = configureEntryQueryAttributes()
 

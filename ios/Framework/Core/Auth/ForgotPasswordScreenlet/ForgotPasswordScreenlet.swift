@@ -16,14 +16,17 @@ import UIKit
 
 @objc public protocol ForgotPasswordScreenletDelegate {
 
-	optional func onForgotPasswordResponse(newPasswordSent:Bool)
-	optional func onForgotPasswordError(error: NSError)
+	optional func screenlet(screenlet: ForgotPasswordScreenlet,
+			onForgotPasswordSent passwordSent: Bool)
+
+	optional func screenlet(screenlet: ForgotPasswordScreenlet,
+			onForgotPasswordError error: NSError)
 
 }
 
 
-@IBDesignable public class ForgotPasswordScreenlet: BaseScreenlet,
-		AuthBasedType, AnonymousAuthType {
+@IBDesignable public class ForgotPasswordScreenlet: BaseScreenlet, AuthBasedType,
+		AnonymousAuthType {
 
 	//MARK: Inspectables
 
@@ -39,7 +42,7 @@ import UIKit
 	@IBInspectable var companyId: Int64 = 0
 
 
-	@IBOutlet public var delegate: ForgotPasswordScreenletDelegate?
+	@IBOutlet public weak var delegate: ForgotPasswordScreenletDelegate?
 
 
 	public var saveCredentials: Bool {
@@ -47,8 +50,8 @@ import UIKit
 		set {}
 	}
 
-	internal var viewModel: ForgotPasswordViewModel {
-		return screenletView as ForgotPasswordViewModel
+	public var viewModel: ForgotPasswordViewModel {
+		return screenletView as! ForgotPasswordViewModel
 	}
 
 
@@ -68,12 +71,13 @@ import UIKit
 		let interactor = ForgotPasswordInteractor(screenlet: self)
 
 		interactor.onSuccess = {
-			self.delegate?.onForgotPasswordResponse?(interactor.resultPasswordSent!)
+			self.delegate?.screenlet?(self,
+					onForgotPasswordSent: interactor.resultPasswordSent!)
 			return
 		}
 
 		interactor.onFailure = {
-			self.delegate?.onForgotPasswordError?($0)
+			self.delegate?.screenlet?(self, onForgotPasswordError: $0)
 			return
 		}
 

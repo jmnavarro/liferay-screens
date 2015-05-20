@@ -208,6 +208,9 @@ public class ServerOperation: NSOperation {
 		if self.onComplete != nil {
 			dispatch_async(dispatch_get_main_queue()) {
 				self.onComplete!(self)
+
+				// this breaks the retain cycle between the op and 'onComplete'
+				self.onComplete = nil
 			}
 		}
 	}
@@ -241,8 +244,10 @@ public class ServerOperation: NSOperation {
 			}
 		}
 
-		self.screenlet.onFinishOperation()
-		self.screenlet.screenletView?.onFinishOperation()
+		dispatch_async(dispatch_get_main_queue()) {
+			self.screenlet.onFinishOperation()
+			self.screenlet.screenletView?.onFinishOperation()
+		}
 	}
 
 }

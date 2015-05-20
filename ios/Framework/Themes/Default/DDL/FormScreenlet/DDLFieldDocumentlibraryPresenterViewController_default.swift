@@ -15,6 +15,9 @@ import UIKit
 import MobileCoreServices
 
 
+private let xibName = "DDLFieldDocumentlibraryPresenterViewController_default"
+
+
 public class DDLFieldDocumentlibraryPresenterViewController_default:
 		UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
@@ -27,10 +30,29 @@ public class DDLFieldDocumentlibraryPresenterViewController_default:
 
 	private let imagePicker = UIImagePickerController()
 
-	override public init() {
-		super.init(
-			nibName: "DDLFieldDocumentlibraryPresenterViewController_default",
-			bundle: nil)
+
+	public override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
+		super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+	}
+
+	public convenience init() {
+		func bundleForXib() -> NSBundle? {
+			let bundles = allBundles(
+					currentClass: DDLFieldDocumentlibraryPresenterViewController_default.self,
+					currentTheme: "default");
+
+			for bundle in bundles {
+				if bundle.pathForResource(xibName, ofType:"nib") != nil {
+					return bundle
+				}
+			}
+
+			return nil
+		}
+
+		self.init(
+			nibName: xibName,
+			bundle: bundleForXib())
 
 		imagePicker.delegate = self
 		imagePicker.allowsEditing = false
@@ -90,8 +112,8 @@ public class DDLFieldDocumentlibraryPresenterViewController_default:
 	//MARK: UIImagePickerControllerDelegate
 
     public func imagePickerController(
-			picker: UIImagePickerController!,
-			didFinishPickingMediaWithInfo info: [NSObject : AnyObject]!) {
+			picker: UIImagePickerController,
+			didFinishPickingMediaWithInfo info: [NSObject : AnyObject]) {
 
 		let selectedImage = info[UIImagePickerControllerOriginalImage] as? UIImage
 		let selectedURL = info[UIImagePickerControllerMediaURL] as? NSURL
@@ -101,7 +123,7 @@ public class DDLFieldDocumentlibraryPresenterViewController_default:
 		imagePicker.dismissViewControllerAnimated(true) {}
 	}
 
-    public func imagePickerControllerDidCancel(picker: UIImagePickerController!) {
+    public func imagePickerControllerDidCancel(picker: UIImagePickerController) {
 		imagePicker.dismissViewControllerAnimated(true) {}
 	}
 

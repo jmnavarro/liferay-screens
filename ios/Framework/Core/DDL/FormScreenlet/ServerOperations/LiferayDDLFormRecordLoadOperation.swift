@@ -36,13 +36,13 @@ public class LiferayDDLFormRecordLoadOperation: ServerOperation {
 	override func validateData() -> Bool {
 		var valid = super.validateData()
 
-		valid &= (recordId != nil)
+		valid = valid && (recordId != nil)
 
 		return valid
 	}
 
 	override internal func doRun(#session: LRSession) {
-		let service = LRMobilewidgetsddlrecordService_v62(session: session)
+		let service = LRScreensddlrecordService_v62(session: session)
 
 		resultRecord = nil
 		resultRecordId = nil

@@ -34,7 +34,13 @@ import QuartzCore
 		}
 	}
 
-	internal var screenletView: BaseScreenletView?
+	internal weak var screenletView: BaseScreenletView?
+
+	public weak var presentingViewController: UIViewController? {
+		didSet {
+			screenletView?.presentingViewController = self.presentingViewController
+		}
+	}
 
 	internal var screenletName: String {
 		var className = NSStringFromClass(self.dynamicType)
@@ -111,7 +117,19 @@ import QuartzCore
 				viewValue.frame = centeredRectInView(self, size: viewValue.frame.size)
 			}
 
-			viewValue.onPerformAction = performAction
+			viewValue.onPerformAction = { [weak self] name, sender in
+				if let interactor = self!.createInteractor(name: name, sender: sender) {
+					self!._runningInteractors.append(interactor)
+
+					return self!.onAction(name: name, interactor: interactor, sender: sender)
+				}
+
+				println("WARN: No interactor created for action \(name)")
+
+				return false
+			}
+
+			viewValue.presentingViewController = self.presentingViewController
 
 			addSubview(viewValue)
 			sendSubviewToBack(viewValue)
@@ -172,13 +190,9 @@ import QuartzCore
 	 * start the interaction programatically.
 	 */
 	internal func performAction(#name: String?, sender: AnyObject? = nil) -> Bool {
-		if let interactor = createInteractor(name: name, sender: sender) {
-			_runningInteractors.append(interactor)
-
-			return onAction(name: name, interactor: interactor, sender: sender)
+		if let screenletViewValue = screenletView {
+			return screenletViewValue.onPerformAction!(name, sender)
 		}
-
-		println("WARN: No interactor created for action \(name)")
 
 		return false
 	}

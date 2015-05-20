@@ -21,6 +21,7 @@ import UIKit
 class UserPortraitBaseInteractor: Interactor {
 
 	var resultURL: NSURL?
+	var resultUserId: Int64?
 
 	func URLForAttributes(#portraitId: Int64, uuid: String, male: Bool) -> NSURL? {
 
@@ -37,9 +38,9 @@ class UserPortraitBaseInteractor: Interactor {
 				}
 			}
 #else
-			var buffer = [Byte](count: Int(CC_SHA1_DIGEST_LENGTH), repeatedValue: 0)
+			var buffer = [UInt8](count: Int(CC_SHA1_DIGEST_LENGTH), repeatedValue: 0)
 
-			CC_SHA1(input, CC_LONG(countElements(input)), &buffer)
+			CC_SHA1(input, CC_LONG(count(input)), &buffer)
 			let data = NSData(bytes: buffer, length: buffer.count)
 			let encodedString = data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions(0))
 

@@ -29,7 +29,7 @@ public class GetUserByEmailOperation: GetUserBaseOperation {
 	override internal func validateData() -> Bool {
 		var valid = super.validateData()
 
-		valid &= ((emailAddress ?? "") != "")
+		valid = valid && ((emailAddress ?? "") != "")
 
 		return valid
 	}
@@ -42,8 +42,7 @@ public class GetUserByEmailOperation: GetUserBaseOperation {
 			error: NSErrorPointer)
 			-> NSDictionary? {
 
-		let companyId = (self.companyId != 0)
-				? self.companyId : LiferayServerContext.companyId
+		let companyId = (self.companyId != 0) ? self.companyId : LiferayServerContext.companyId
 
 		return service.getUserByEmailAddressWithCompanyId(companyId,
 				emailAddress: emailAddress,
