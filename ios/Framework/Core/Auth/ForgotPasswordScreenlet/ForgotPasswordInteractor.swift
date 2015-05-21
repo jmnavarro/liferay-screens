@@ -30,6 +30,8 @@ class ForgotPasswordInteractor: ServerOperationInteractor {
 				operation = LiferayForgotPasswordUserIdOperation(screenlet: screenlet)
 			case .Email:
 				operation = LiferayForgotPasswordEmailOperation(screenlet: screenlet)
+			case .OAuth:
+				assertionFailure("ForgotPasswordInteractor cannot be used with OAuth")
 		}
 
 		operation!.companyId = screenlet.companyId

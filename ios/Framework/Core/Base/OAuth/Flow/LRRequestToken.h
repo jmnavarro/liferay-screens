@@ -12,20 +12,15 @@
  * details.
  */
 
-#ifdef LIFERAY_SCREENS_FRAMEWORK
-	@import LRMobileSDK;
-#else
-	#import "LRBaseService.h"
-#endif
+#import "LROAuthConfig.h"
 
 /**
  * @author Bruno Farache
  */
-@interface LRScreensuserService_v62 : LRBaseService
+@interface LRRequestToken : NSObject
 
-- (NSDictionary *)getCurrentUser:(NSError **)error;
-- (BOOL)sendPasswordByEmailAddressWithCompanyId:(long long)companyId emailAddress:(NSString *)emailAddress error:(NSError **)error;
-- (BOOL)sendPasswordByScreenNameWithCompanyId:(long long)companyId screenName:(NSString *)screenName error:(NSError **)error;
-- (BOOL)sendPasswordByUserIdWithUserId:(long long)userId error:(NSError **)error;
++ (void)requestTokenWithConfig:(LROAuthConfig *)config
+	onSuccess:(void (^)(LROAuthConfig *))success
+	onFailure:(void (^)(NSError *))failure;
 
 @end

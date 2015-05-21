@@ -50,15 +50,16 @@ public enum AuthMethod: String {
 	case Email = "email"
 	case ScreenName = "screenName"
 	case UserId = "userId"
+	case OAuth = "oauth"
+
+	public static func all() -> [AuthMethod] {
+		return [.Email, .ScreenName, .UserId, .OAuth]
+	}
 
 	public static func create(text: String?) -> AuthMethod {
-		if text?.lowercaseString == AuthMethod.ScreenName.rawValue.lowercaseString {
-			return .ScreenName
-		} else if text?.lowercaseString == AuthMethod.UserId.rawValue.lowercaseString {
-			return .UserId
-		}
-
-		return .Email
+		return all().filter {
+				$0.rawValue == text?.lowercaseString
+			}.first ?? .Email
 	}
 
 	public var iconType: String {

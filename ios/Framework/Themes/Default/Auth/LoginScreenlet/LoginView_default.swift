@@ -16,13 +16,14 @@ import UIKit
 
 public class LoginView_default: BaseScreenletView, LoginViewModel {
 
-	@IBOutlet internal var userNameIcon: UIImageView?
-	@IBOutlet internal var userNameField: UITextField?
-	@IBOutlet internal var passwordField: UITextField?
-	@IBOutlet internal var rememberSwitch: UISwitch?
-	@IBOutlet internal var loginButton: UIButton?
-	@IBOutlet internal var userNameBackground: UIImageView?
-	@IBOutlet internal var passwordBackground: UIImageView?
+	@IBOutlet public weak var userNameIcon: UIImageView!
+	@IBOutlet public weak var userNameField: UITextField!
+	@IBOutlet public weak var passwordField: UITextField!
+	@IBOutlet public weak var rememberSwitch: UISwitch!
+	@IBOutlet public weak var loginButton: UIButton!
+	@IBOutlet public weak var userNameBackground: UIImageView!
+	@IBOutlet public weak var passwordBackground: UIImageView!
+	@IBOutlet public weak var authorizeButton: UIButton!
 
 
 	//MARK: AuthBasedViewModel
@@ -42,8 +43,10 @@ public class LoginView_default: BaseScreenletView, LoginViewModel {
 		}
 	}
 
-	public var authMethod: AuthMethodType? = AuthMethod.Email.rawValue {
+	public var authMethod: AuthMethodType? = AuthMethod.OAuth.rawValue {
 		didSet {
+			configureAuthMethod()
+
 			setAuthMethodStyles(
 					view: self,
 					authMethod: AuthMethod.create(authMethod),
@@ -57,19 +60,19 @@ public class LoginView_default: BaseScreenletView, LoginViewModel {
 
 	public var userName: String? {
 		get {
-			return nullIfEmpty(userNameField!.text)
+			return nullIfEmpty(userNameField.text)
 		}
 		set {
-			userNameField!.text = newValue
+			userNameField.text = newValue
 		}
 	}
 
 	public var password: String? {
 		get {
-			return nullIfEmpty(passwordField!.text)
+			return nullIfEmpty(passwordField.text)
 		}
 		set {
-			passwordField!.text = newValue
+			passwordField.text = newValue
 		}
 	}
 
@@ -80,8 +83,11 @@ public class LoginView_default: BaseScreenletView, LoginViewModel {
 		super.onCreated()
 
 		setButtonDefaultStyle(loginButton)
+		setButtonDefaultStyle(authorizeButton)
 
 		BaseScreenlet.setHUDCustomColor(DefaultThemeBasicBlue)
+
+		configureAuthMethod()
 	}
 
 	override internal func onSetTranslations() {
@@ -92,11 +98,11 @@ public class LoginView_default: BaseScreenletView, LoginViewModel {
 	}
 
 	override internal func onStartOperation() {
-		loginButton!.enabled = false
+		loginButton.enabled = false
 	}
 
 	override internal func onFinishOperation() {
-		loginButton!.enabled = true
+		loginButton.enabled = true
 	}
 
 
@@ -104,14 +110,22 @@ public class LoginView_default: BaseScreenletView, LoginViewModel {
 
 	internal func textFieldShouldBeginEditing(textField: UITextField!) -> Bool {
 		if userNameBackground != nil {
-			userNameBackground!.highlighted = (textField == userNameField);
+			userNameBackground.highlighted = (textField == userNameField);
 		}
 
 		if passwordBackground != nil {
-			passwordBackground!.highlighted = (textField == passwordField);
+			passwordBackground.highlighted = (textField == passwordField);
 		}
 
 		return true
+	}
+
+
+	public func configureAuthMethod() {
+		let authMethodValue = AuthMethod.create(authMethod)
+
+		authorizeButton.hidden = (authMethodValue != .OAuth)
+		loginButton.superview?.hidden = (authMethodValue == .OAuth)
 	}
 
 }

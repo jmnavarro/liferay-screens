@@ -71,6 +71,18 @@ public class LoginScreenlet: BaseScreenlet, AuthBasedType {
 	}
 
 	override internal func createInteractor(#name: String?, sender: AnyObject?) -> Interactor? {
+
+		switch name! {
+		case "login-action":
+			return createLoginInteractor()
+		case "oauth-action":
+			return createOAuthInteractor()
+		default:
+			return nil
+		}
+	}
+
+	private func createLoginInteractor() -> LoginInteractor {
 		let interactor = LoginInteractor(screenlet: self)
 
 		interactor.onSuccess = {
@@ -91,5 +103,34 @@ public class LoginScreenlet: BaseScreenlet, AuthBasedType {
 
 		return interactor
 	}
+
+	private func createOAuthInteractor() -> OAuthInteractor {
+		let interactor = OAuthInteractor(
+				screenlet: self,
+				consumerKey: "14a728c9-a39e-4a03-aa88-0a2c149d7545",
+				consumerSecret: "437cc660383e99a4b1ed8f5d4243a72a",
+				callbackURL: "http://192.168.40.158:8080/")
+
+		interactor.onSuccess = {
+			self.delegate?.screenlet?(self,
+					onLoginResponseUserAttributes: interactor.resultUserAttributes!)
+
+/*TODO is it possible to store oauth tokens?
+			if self.saveCredentials {
+				if SessionContext.storeSession() {
+					self.delegate?.onScreenletCredentialsSaved?(self)
+				}
+			}
+*/
+		}
+
+		interactor.onFailure = {
+			self.delegate?.screenlet?(self, onLoginError: $0)
+			return
+		}
+
+		return interactor
+	}
+
 
 }
