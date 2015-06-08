@@ -107,10 +107,10 @@ public class LoginScreenlet: BaseScreenlet, BasicAuthBasedType {
 
 	private func copyAuthType() {
 		if OAuthConsumerKey != "" && OAuthConsumerSecret != "" {
-			viewModel.authType = AuthType.OAuth.rawValue
+			(screenletView as? LoginViewModel)?.authType = AuthType.OAuth.rawValue
 		}
 		else {
-			viewModel.authType = AuthType.Basic.rawValue
+			(screenletView as? LoginViewModel)?.authType = AuthType.Basic.rawValue
 		}
 	}
 
