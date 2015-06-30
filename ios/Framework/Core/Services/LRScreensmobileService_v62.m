@@ -19,12 +19,13 @@
  */
 @implementation LRScreensmobileService_v62
 
-- (NSDictionary *)addScreensMobileWithAppId:(NSString *)appId placeholderId:(NSString *)placeholderId assetEntryId:(long long)assetEntryId customContentText:(NSString *)customContentText serviceContext:(LRJSONObjectWrapper *)serviceContext error:(NSError **)error {
+- (NSDictionary *)addScreensMobileWithTacticId:(long long)tacticId appId:(NSString *)appId placeholderId:(NSString *)placeholderId assetEntryId:(long long)assetEntryId customContentMap:(NSDictionary *)customContentMap serviceContext:(LRJSONObjectWrapper *)serviceContext error:(NSError **)error {
 	NSMutableDictionary *_params = [NSMutableDictionary dictionaryWithDictionary:@{
-		@"appId": appId,
-		@"placeholderId": placeholderId,
+		@"tacticId": @(tacticId),
+		@"appId": [self checkNull: appId],
+		@"placeholderId": [self checkNull: placeholderId],
 		@"assetEntryId": @(assetEntryId),
-		@"customContentText": customContentText,
+		@"customContentMap": [self checkNull: customContentMap],
 	}];
 
 	[self mangleWrapperWithParams:_params name:@"serviceContext" className:@"com.liferay.portal.service.ServiceContext" wrapper:serviceContext];
@@ -36,9 +37,9 @@
 
 - (NSArray *)getContentWithAppId:(NSString *)appId groupId:(long long)groupId userContext:(NSDictionary *)userContext serviceContext:(LRJSONObjectWrapper *)serviceContext error:(NSError **)error {
 	NSMutableDictionary *_params = [NSMutableDictionary dictionaryWithDictionary:@{
-		@"appId": appId,
+		@"appId": [self checkNull: appId],
 		@"groupId": @(groupId),
-		@"userContext": userContext,
+		@"userContext": [self checkNull: userContext],
 	}];
 
 	[self mangleWrapperWithParams:_params name:@"serviceContext" className:@"com.liferay.portal.service.ServiceContext" wrapper:serviceContext];
@@ -50,10 +51,25 @@
 
 - (NSArray *)getContentWithAppId:(NSString *)appId groupId:(long long)groupId placeholderId:(NSString *)placeholderId userContext:(NSDictionary *)userContext serviceContext:(LRJSONObjectWrapper *)serviceContext error:(NSError **)error {
 	NSMutableDictionary *_params = [NSMutableDictionary dictionaryWithDictionary:@{
-		@"appId": appId,
+		@"appId": [self checkNull: appId],
 		@"groupId": @(groupId),
-		@"placeholderId": placeholderId,
-		@"userContext": userContext,
+		@"placeholderId": [self checkNull: placeholderId],
+		@"userContext": [self checkNull: userContext],
+	}];
+
+	[self mangleWrapperWithParams:_params name:@"serviceContext" className:@"com.liferay.portal.service.ServiceContext" wrapper:serviceContext];
+
+	NSDictionary *_command = @{@"/channel-screens-mobile.screensmobile/get-content": _params};
+
+	return (NSArray *)[self.session invoke:_command error:error];
+}
+
+- (NSArray *)getContentWithAppId:(NSString *)appId groupId:(long long)groupId placeholderIds:(NSArray *)placeholderIds userContext:(NSDictionary *)userContext serviceContext:(LRJSONObjectWrapper *)serviceContext error:(NSError **)error {
+	NSMutableDictionary *_params = [NSMutableDictionary dictionaryWithDictionary:@{
+		@"appId": [self checkNull: appId],
+		@"groupId": @(groupId),
+		@"placeholderIds": [self checkNull: placeholderIds],
+		@"userContext": [self checkNull: userContext],
 	}];
 
 	[self mangleWrapperWithParams:_params name:@"serviceContext" className:@"com.liferay.portal.service.ServiceContext" wrapper:serviceContext];
@@ -73,24 +89,13 @@
 	return (NSDictionary *)[self.session invoke:_command error:error];
 }
 
-- (NSDictionary *)updateScreensMobileWithScreensMobileId:(long long)screensMobileId tacticId:(long long)tacticId error:(NSError **)error {
+- (NSDictionary *)updateScreensMobileWithScreensMobileId:(long long)screensMobileId appId:(NSString *)appId placeholderId:(NSString *)placeholderId assetEntryId:(long long)assetEntryId customContentMap:(NSDictionary *)customContentMap serviceContext:(LRJSONObjectWrapper *)serviceContext error:(NSError **)error {
 	NSMutableDictionary *_params = [NSMutableDictionary dictionaryWithDictionary:@{
 		@"screensMobileId": @(screensMobileId),
-		@"tacticId": @(tacticId)
-	}];
-
-	NSDictionary *_command = @{@"/channel-screens-mobile.screensmobile/update-screens-mobile": _params};
-
-	return (NSDictionary *)[self.session invoke:_command error:error];
-}
-
-- (NSDictionary *)updateScreensMobileWithScreensMobileId:(long long)screensMobileId appId:(NSString *)appId placeholderId:(NSString *)placeholderId assetEntryId:(long long)assetEntryId customContentText:(NSString *)customContentText serviceContext:(LRJSONObjectWrapper *)serviceContext error:(NSError **)error {
-	NSMutableDictionary *_params = [NSMutableDictionary dictionaryWithDictionary:@{
-		@"screensMobileId": @(screensMobileId),
-		@"appId": appId,
-		@"placeholderId": placeholderId,
+		@"appId": [self checkNull: appId],
+		@"placeholderId": [self checkNull: placeholderId],
 		@"assetEntryId": @(assetEntryId),
-		@"customContentText": customContentText,
+		@"customContentMap": [self checkNull: customContentMap],
 	}];
 
 	[self mangleWrapperWithParams:_params name:@"serviceContext" className:@"com.liferay.portal.service.ServiceContext" wrapper:serviceContext];

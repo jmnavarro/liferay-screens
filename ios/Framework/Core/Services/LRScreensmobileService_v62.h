@@ -23,11 +23,11 @@
  */
 @interface LRScreensmobileService_v62 : LRBaseService
 
-- (NSDictionary *)addScreensMobileWithAppId:(NSString *)appId placeholderId:(NSString *)placeholderId assetEntryId:(long long)assetEntryId customContentText:(NSString *)customContentText serviceContext:(LRJSONObjectWrapper *)serviceContext error:(NSError **)error;
+- (NSDictionary *)addScreensMobileWithTacticId:(long long)tacticId appId:(NSString *)appId placeholderId:(NSString *)placeholderId assetEntryId:(long long)assetEntryId customContentMap:(NSDictionary *)customContentMap serviceContext:(LRJSONObjectWrapper *)serviceContext error:(NSError **)error;
 - (NSArray *)getContentWithAppId:(NSString *)appId groupId:(long long)groupId userContext:(NSDictionary *)userContext serviceContext:(LRJSONObjectWrapper *)serviceContext error:(NSError **)error;
 - (NSArray *)getContentWithAppId:(NSString *)appId groupId:(long long)groupId placeholderId:(NSString *)placeholderId userContext:(NSDictionary *)userContext serviceContext:(LRJSONObjectWrapper *)serviceContext error:(NSError **)error;
+- (NSArray *)getContentWithAppId:(NSString *)appId groupId:(long long)groupId placeholderIds:(NSArray *)placeholderIds userContext:(NSDictionary *)userContext serviceContext:(LRJSONObjectWrapper *)serviceContext error:(NSError **)error;
 - (NSDictionary *)getScreensMobileWithScreensMobileId:(long long)screensMobileId error:(NSError **)error;
-- (NSDictionary *)updateScreensMobileWithScreensMobileId:(long long)screensMobileId tacticId:(long long)tacticId error:(NSError **)error;
-- (NSDictionary *)updateScreensMobileWithScreensMobileId:(long long)screensMobileId appId:(NSString *)appId placeholderId:(NSString *)placeholderId assetEntryId:(long long)assetEntryId customContentText:(NSString *)customContentText serviceContext:(LRJSONObjectWrapper *)serviceContext error:(NSError **)error;
+- (NSDictionary *)updateScreensMobileWithScreensMobileId:(long long)screensMobileId appId:(NSString *)appId placeholderId:(NSString *)placeholderId assetEntryId:(long long)assetEntryId customContentMap:(NSDictionary *)customContentMap serviceContext:(LRJSONObjectWrapper *)serviceContext error:(NSError **)error;
 
 @end
