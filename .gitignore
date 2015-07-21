@@ -18,5 +18,9 @@ DerivedData
 *.ipa
 *.xcuserstate
 
+Podfile
 Pods/
-Podfile.lock
+
+.idea
+*.iml
+android/samples/addbookmarkscreenlet/local.properties
