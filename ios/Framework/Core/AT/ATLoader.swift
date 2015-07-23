@@ -26,8 +26,28 @@ import UIKit
 	}
 }
 
+@objc public protocol ATLoaderDelegate {
+
+	optional func audienceTargetingLoader(loader: ATLoader,
+			onAssetRetrieved asset: ATAsset?,
+			forPlaceholderId: String)
+
+	optional func audienceTargetingLoader(loader: ATLoader,
+			onCustomContentRetrieved customContent: String?,
+			forPlaceholderId: String)
+
+	optional func audienceTargetingLoader(loader: ATLoader,
+			onRetrieveCompleted placeholderIds: [String])
+
+	optional func audienceTargetingLoader(loader: ATLoader,
+			onRetrieveError error: NSError,
+			forPlaceholderIds: [String])
+
+}
 
 @objc public class ATLoader : NSObject {
+
+	public weak var delegate: ATLoaderDelegate?
 
 	private var groupId: Int64
 	private var appId: String
@@ -135,6 +155,10 @@ import UIKit
 
 			if let error = $0.lastError {
 				result(nil, error)
+
+				self.delegate?.audienceTargetingLoader?(self,
+						onRetrieveError: error,
+						forPlaceholderIds: loadOp.placeholderIds!)
 			}
 			else {
 				let placeholderId = loadOp.placeholderIds!.first!
@@ -142,21 +166,36 @@ import UIKit
 				self.lastUserSegmentIds = resultMap?.segmentIds
 						?? self.lastUserSegmentIds
 
-				if let customContent = resultMap?.customContent {
-					let localizedContent = customContent[NSLocale.currentLanguageString]
-								?? customContent["en_US"]
+				if let customContent = resultMap?.customContent,
+					localizedContent = customContent[NSLocale.currentLanguageString]
+						?? customContent["en_US"] {
 					self.customContentCache[placeholderId] = localizedContent
+
 					result(localizedContent, nil)
+
+					self.delegate?.audienceTargetingLoader?(self,
+							onCustomContentRetrieved: localizedContent,
+							forPlaceholderId: placeholderId)
 				}
 				else {
 					// no error, no content
 					result(nil, nil)
+
+					self.delegate?.audienceTargetingLoader?(self,
+							onCustomContentRetrieved: nil,
+							forPlaceholderId: placeholderId)
 				}
 			}
 		}
 
 		if !operation.validateAndEnqueue() {
-			result(nil, NSError.errorWithCause(.AbortedDueToPreconditions))
+			let error = NSError.errorWithCause(.AbortedDueToPreconditions)
+
+			result(nil, error)
+
+			self.delegate?.audienceTargetingLoader?(self,
+					onRetrieveError: error,
+					forPlaceholderIds: operation.placeholderIds!)
 		}
 	}
 
@@ -212,6 +251,10 @@ import UIKit
 
 			if let error = $0.lastError {
 				result(nil, error)
+
+				self.delegate?.audienceTargetingLoader?(self,
+						onRetrieveError: error,
+						forPlaceholderIds: loadOp.placeholderIds!)
 			}
 			else {
 				let placeholderId = loadOp.placeholderIds!.first!
@@ -223,17 +266,32 @@ import UIKit
 						classPK = resultMap?.classPK {
 					let asset = ATAsset(className: className, classPK: classPK)
 					self.assetCache[placeholderId] = asset
+
 					result(asset, nil)
+
+					self.delegate?.audienceTargetingLoader?(self,
+							onAssetRetrieved: asset,
+							forPlaceholderId: placeholderId)
 				}
 				else {
 					// no error, no content
 					result(nil, nil)
+
+					self.delegate?.audienceTargetingLoader?(self,
+							onAssetRetrieved: nil,
+							forPlaceholderId: placeholderId)
 				}
 			}
 		}
 
 		if !operation.validateAndEnqueue() {
-			result(nil, NSError.errorWithCause(.AbortedDueToPreconditions))
+			let error = NSError.errorWithCause(.AbortedDueToPreconditions)
+
+			result(nil, error)
+
+			self.delegate?.audienceTargetingLoader?(self,
+					onRetrieveError: error,
+					forPlaceholderIds: operation.placeholderIds!)
 		}
 	}
 
@@ -256,22 +314,34 @@ import UIKit
 
 			if let error = $0.lastError {
 				onError(error)
+
+				self.delegate?.audienceTargetingLoader?(self,
+						onRetrieveError: error,
+						forPlaceholderIds: loadOp.placeholderIds!)
 			}
 			else {
 				let loadOp = $0 as! ATLoadPlaceholderOperation
+
+				var retrievedIds = [String]()
 
 				for (placeholderId, maps) in loadOp.results! {
 					let map = maps.first!
 
 					self.lastUserSegmentIds = map.segmentIds
-						?? self.lastUserSegmentIds
+							?? self.lastUserSegmentIds
 
-					if let customContent = map.customContent {
-						let localizedContent = customContent[NSLocale.currentLanguageString]
-								?? customContent["en_US"]
+					if let customContent = map.customContent,
+							localizedContent = customContent[NSLocale.currentLanguageString]
+								?? customContent["en_US"] {
 						self.customContentCache[placeholderId] = localizedContent
 
 						onResult(placeholderId, localizedContent)
+
+						self.delegate?.audienceTargetingLoader?(self,
+								onCustomContentRetrieved: localizedContent,
+								forPlaceholderId: placeholderId)
+
+						retrievedIds.append(placeholderId)
 					}
 					else if let className = map.className,
 							classPK = map.classPK {
@@ -279,17 +349,36 @@ import UIKit
 						self.assetCache[placeholderId] = asset
 
 						onResult(placeholderId, asset)
+
+						self.delegate?.audienceTargetingLoader?(self,
+								onAssetRetrieved: asset,
+								forPlaceholderId: placeholderId)
+
+						retrievedIds.append(placeholderId)
 					}
 					else {
 						// no error, no content
 						onResult(placeholderId, nil)
+
+						self.delegate?.audienceTargetingLoader?(self,
+							onAssetRetrieved: nil,
+							forPlaceholderId: placeholderId)
 					}
 				}
+
+				self.delegate?.audienceTargetingLoader?(self,
+						onRetrieveCompleted: retrievedIds)
 			}
 		}
 
 		if !operation.validateAndEnqueue() {
-			onError(NSError.errorWithCause(.AbortedDueToPreconditions))
+			let error = NSError.errorWithCause(.AbortedDueToPreconditions)
+
+			onError(error)
+
+			self.delegate?.audienceTargetingLoader?(self,
+					onRetrieveError: error,
+					forPlaceholderIds: placeholderIds)
 		}
 	}
 
