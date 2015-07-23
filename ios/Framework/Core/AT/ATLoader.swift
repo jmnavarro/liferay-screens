@@ -14,7 +14,7 @@
 import UIKit
 
 
-@objc public class AudienceTargetingLoader : NSObject {
+@objc public class ATLoader : NSObject {
 
 	private var groupId: Int64
 	private var appId: String
@@ -93,14 +93,14 @@ import UIKit
 			context: [String:String],
 			result: (String?, NSError?) -> Void) {
 
-		let operation = AudienceTargetingLoadPlaceholderOperation()
+		let operation = ATLoadPlaceholderOperation()
 
 		operation.groupId = (groupId != 0) ? groupId : LiferayServerContext.groupId
 
 		operation.appId = appId
 		operation.placeholderIds = [placeholderId]
 
-		operation.userContext = ((AudienceTargetingLoader.computeUserContext() + context) as! [String:String])
+		operation.userContext = ((ATLoader.computeUserContext() + context) as! [String:String])
 
 		// TODO retain-cycle on operation?
 		operation.onComplete = {
@@ -108,7 +108,7 @@ import UIKit
 				result(nil, error)
 			}
 			else {
-				let loadOp = $0 as! AudienceTargetingLoadPlaceholderOperation
+				let loadOp = $0 as! ATLoadPlaceholderOperation
 
 				let placeholderId = loadOp.placeholderIds!.first!
 				let resultMap = loadOp.firstResultForPlaceholderId(placeholderId)

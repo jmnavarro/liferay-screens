@@ -14,29 +14,29 @@
 import UIKit
 
 
-@objc public protocol AudienceTargetingDisplayScreenletDelegate {
+@objc public protocol ATDisplayScreenletDelegate {
 
-	optional func screenlet(screenlet: AudienceTargetingDisplayScreenlet,
+	optional func screenlet(screenlet: ATDisplayScreenlet,
 			onAudienceTargetingResponse value: AnyObject,
 			mimeType: String?)
 
 	optional func screenletOnAudienceTargetingEmptyResponse(
-			screenlet: AudienceTargetingDisplayScreenlet)
+			screenlet: ATDisplayScreenlet)
 
-	optional func screenlet(screenlet: AudienceTargetingDisplayScreenlet,
+	optional func screenlet(screenlet: ATDisplayScreenlet,
 			onAudienceTargetingError error: NSError)
 
 }
 
 
-@IBDesignable public class AudienceTargetingDisplayScreenlet: BaseScreenlet {
+@IBDesignable public class ATDisplayScreenlet: BaseScreenlet {
 
 	@IBInspectable public var appId: String = "" // should be Int64?
 	@IBInspectable public var groupId: Int64 = 0
 	@IBInspectable public var placeholderId: String = ""
 	@IBInspectable public var autoLoad: Bool = true
 
-	@IBOutlet public weak var delegate: AudienceTargetingDisplayScreenletDelegate?
+	@IBOutlet public weak var delegate: ATDisplayScreenletDelegate?
 
 	var context: [String:String]?
 
@@ -51,7 +51,7 @@ import UIKit
 
 	override public func createInteractor(#name: String?, sender: AnyObject?) -> Interactor? {
 		// what if we pass data to be used in rules evaluation in this request?
-		let interactor = AudienceTargetingLoadPlaceholderInteractor(
+		let interactor = ATLoadPlaceholderInteractor(
 				screenlet: self,
 				groupId: self.groupId,
 				appId: self.appId,
@@ -62,7 +62,7 @@ import UIKit
 		screenletView?.onStartOperation()
 
 		interactor.onSuccess = {
-			let viewModel = (self.screenletView as! AudienceTargetingDisplayViewModel)
+			let viewModel = (self.screenletView as! ATDisplayViewModel)
 
 			if interactor.resultCustomContent != nil || interactor.resultContent != nil {
 				let content: AnyObject = interactor.resultCustomContent ?? interactor.resultContent!

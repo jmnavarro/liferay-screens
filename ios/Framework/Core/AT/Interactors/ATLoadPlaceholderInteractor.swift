@@ -14,7 +14,7 @@
 import UIKit
 
 
-class AudienceTargetingLoadPlaceholderInteractor: Interactor {
+class ATLoadPlaceholderInteractor: Interactor {
 
 	let groupId: Int64
 	let appId: String
@@ -44,7 +44,7 @@ class AudienceTargetingLoadPlaceholderInteractor: Interactor {
 	}
 
 	override func start() -> Bool {
-		let result = createAudienceTargetingOperation().validateAndEnqueue()
+		let result = createATOperation().validateAndEnqueue()
 
 		if !result {
 			self.callOnFailure(NSError.errorWithCause(.AbortedDueToPreconditions))
@@ -53,17 +53,17 @@ class AudienceTargetingLoadPlaceholderInteractor: Interactor {
 		return result
 	}
 
-	func createAudienceTargetingOperation() -> AudienceTargetingLoadPlaceholderOperation {
-		let operation = AudienceTargetingLoadPlaceholderOperation(screenlet: self.screenlet)
+	func createATOperation() -> ATLoadPlaceholderOperation {
+		let operation = ATLoadPlaceholderOperation(screenlet: self.screenlet)
 
 		operation.groupId = self.groupId
 		operation.appId = self.appId
 		operation.placeholderIds = [self.placeholderId]
-		operation.userContext = ((AudienceTargetingLoader.computeUserContext() + context) as! [String:String])
+		operation.userContext = ((ATLoader.computeUserContext() + context) as! [String:String])
 
 		// TODO retain-cycle on operation?
 		operation.onComplete = {
-			let loadOp = ($0 as! AudienceTargetingLoadPlaceholderOperation)
+			let loadOp = ($0 as! ATLoadPlaceholderOperation)
 
 			if let error = $0.lastError {
 				self.callOnFailure(error)

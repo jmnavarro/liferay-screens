@@ -18,7 +18,7 @@ import UIKit
 #endif
 
 
-public class AudienceTargetingDisplayView_default: BaseScreenletView, AudienceTargetingDisplayViewModel {
+public class ATDisplayView_default: BaseScreenletView, ATDisplayViewModel {
 
 	@IBOutlet weak var imageView: UIImageView?
 	@IBOutlet weak var activityView: UIActivityIndicatorView!
@@ -36,7 +36,7 @@ public class AudienceTargetingDisplayView_default: BaseScreenletView, AudienceTa
 	}
 
 
-	//MARK: AudienceTargetingDisplayViewModel
+	//MARK: ATDisplayViewModel
 
 	public func setEmptyContent() {
 		//TODO
