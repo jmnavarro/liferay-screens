@@ -21,11 +21,16 @@ import UIKit
 public struct PlaceholderMapping {
 	var className: String?
 	var classPK: Int64?
-	var customContent: String?
+	var customContent: [String:String]?
 	var priority: Int
 	var segmentIds: [Int64]?
 
-	init?(className: String?, classPK: Int64?, customContent: String?, priority: Int?, segments: [AnyObject]?) {
+	init?(className: String?,
+			classPK: Int64?,
+			customContent: [String:String]?,
+			priority: Int?,
+			segments: [AnyObject]?) {
+
 		if customContent != nil && (className == nil || classPK == nil) {
 			return nil
 		}
@@ -35,10 +40,14 @@ public struct PlaceholderMapping {
 
 		self.className = className
 		self.classPK = classPK
-		self.customContent = (customContent ?? "") == "" ? nil : customContent
+		self.customContent = customContent
 		self.priority = priority!
 
-		segmentIds = (segments ?? []).map { $0 as? Int}.filter { $0 != nil }.map { Int64($0!) }
+		segmentIds =
+				(segments ?? [])
+					.map    { $0 as? Int }
+					.filter { $0 != nil }
+					.map    { Int64($0!) }
 	}
 }
 
@@ -47,10 +56,10 @@ public class AudienceTargetingLoadPlaceholderOperation: ServerOperation {
 
 	public var appId: String?
 	public var groupId: Int64?
-	public var placeholderId: String?
+	public var placeholderIds: [String]?
 	public var userContext: [String : String]?
 
-	public var results: [PlaceholderMapping]?
+	public var results: [String:[PlaceholderMapping]]?
 
 
 	//MARK: ServerOperation
@@ -60,7 +69,7 @@ public class AudienceTargetingLoadPlaceholderOperation: ServerOperation {
 
 		valid = valid && (appId ?? "" != "")
 		valid = valid && (groupId != nil)
-		valid = valid && (placeholderId  ?? "" != "")
+		valid = valid && !(placeholderIds ?? []).isEmpty
 		valid = valid && !(userContext ?? [:]).isEmpty
 
 		return valid
@@ -73,33 +82,47 @@ public class AudienceTargetingLoadPlaceholderOperation: ServerOperation {
 
 		let result = service.getContentWithAppId(appId!,
 				groupId: groupId!,
-				placeholderId: placeholderId!,
+				placeholderIds: placeholderIds!,
 				userContext: userContext!,
 				serviceContext: nil,
 				error: &lastError)
 
 		if lastError == nil {
-			results = []
+			results = [:]
 
 			let resultList = result as! [[String:AnyObject]]
 			for content in resultList {
 				if let placeholderMap = PlaceholderMapping(
 						className: content["className"] as? String,
 						classPK: content["classPK"].map { $0 as! Int }.map { Int64($0) },
-						customContent: content["customContent"] as? String,
+						customContent: content["customContent"] as? [String:String],
 						priority: content["campaignId"] as? Int,
 						segments: content["userSegmentIds"] as? [AnyObject]) {
-					results?.append(placeholderMap)
+
+					let placeholder = content["placeholderId"] as! String
+					if results?[placeholder] == nil {
+						results?[placeholder] = []
+					}
+
+					results?[placeholder]?.append(placeholderMap)
 				}
 				else {
 					println("Wrong audience targeting mapping: \(content)")
 				}
 			}
 
-			if results?.count > 1 {
-				results?.sort { $0.priority > $1.priority }
+			for (placeholder, items) in results! {
+				if items.count > 1 {
+					var sorted = items
+					sorted.sort { $0.priority > $1.priority }
+					results?[placeholder] = sorted
+				}
 			}
 		}
+	}
+
+	public func firstResultForPlaceholderId(placeholderId: String) -> PlaceholderMapping? {
+		return self.results?[placeholderId]?.first
 	}
 
 }

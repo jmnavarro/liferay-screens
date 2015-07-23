@@ -23,7 +23,7 @@ class AudienceTargetingLoadPlaceholderInteractor: Interactor {
 
 	var resultClassPK: String?
 	var resultClassName: String?
-	var resultCustomContent: String?
+	var resultCustomContent: [String:String]?
 
 	var resultContent: AnyObject?
 	var resultMimeType: String?
@@ -63,10 +63,12 @@ class AudienceTargetingLoadPlaceholderInteractor: Interactor {
 
 		// TODO retain-cycle on operation?
 		operation.onComplete = {
+			let loadOp = ($0 as! AudienceTargetingLoadPlaceholderOperation)
+
 			if let error = $0.lastError {
 				self.callOnFailure(error)
 			}
-			else if let result = ($0 as! AudienceTargetingLoadPlaceholderOperation).results?.first {
+			else if let result = loadOp.firstResultForPlaceholderId(self.placeholderId) {
 				if let customContent = result.customContent {
 					self.resultCustomContent = customContent
 					self.resultClassName = nil

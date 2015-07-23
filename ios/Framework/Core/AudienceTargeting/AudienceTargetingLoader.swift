@@ -98,7 +98,7 @@ import UIKit
 		operation.groupId = (groupId != 0) ? groupId : LiferayServerContext.groupId
 
 		operation.appId = appId
-		operation.placeholderId = placeholderId
+		operation.placeholderIds = [placeholderId]
 
 		operation.userContext = ((AudienceTargetingLoader.computeUserContext() + context) as! [String:String])
 
@@ -110,11 +110,14 @@ import UIKit
 			else {
 				let loadOp = $0 as! AudienceTargetingLoadPlaceholderOperation
 
-				self.lastUserSegmentIds = loadOp.results?.first?.segmentIds ?? self.lastUserSegmentIds
+				let placeholderId = loadOp.placeholderIds!.first!
+				let resultMap = loadOp.firstResultForPlaceholderId(placeholderId)
+				self.lastUserSegmentIds = resultMap?.segmentIds ?? self.lastUserSegmentIds
 
-				if let customContent = loadOp.results?.first?.customContent {
-					self.contentCache[loadOp.placeholderId!] = customContent
-					result(customContent, nil)
+				if let customContent = resultMap?.customContent {
+					var localizedContent = customContent[NSLocale.currentLanguageString] ?? customContent["en_US"]
+					self.contentCache[placeholderId] = localizedContent
+					result(localizedContent, nil)
 				}
 				else {
 					// no error, no content
