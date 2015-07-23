@@ -16,6 +16,9 @@ import UIKit
 
 class AudienceTargetingLoadPlaceholderInteractor: Interactor {
 
+	let groupId: Int64
+	let appId: String
+	let placeholderId: String
 	let context: [String:String]
 
 	var resultClassPK: String?
@@ -26,7 +29,15 @@ class AudienceTargetingLoadPlaceholderInteractor: Interactor {
 	var resultMimeType: String?
 
 
-	init(screenlet: BaseScreenlet, context: [String:String]) {
+	init(screenlet: BaseScreenlet,
+			groupId: Int64,
+			appId: String,
+			placeholderId: String,
+			context: [String:String]) {
+
+		self.groupId = (groupId != 0) ? groupId : LiferayServerContext.groupId
+		self.appId = appId
+		self.placeholderId = placeholderId
 		self.context = context
 
 		super.init(screenlet: screenlet)
@@ -43,17 +54,12 @@ class AudienceTargetingLoadPlaceholderInteractor: Interactor {
 	}
 
 	func createAudienceTargetingOperation() -> AudienceTargetingLoadPlaceholderOperation {
-		let screenlet = self.screenlet as! AudienceTargetingDisplayScreenlet
 		let operation = AudienceTargetingLoadPlaceholderOperation(screenlet: self.screenlet)
 
-		operation.groupId = (screenlet.groupId != 0)
-				? screenlet.groupId : LiferayServerContext.groupId
-
-		operation.appId = screenlet.appId
-		operation.placeholderId = screenlet.placeholderId
-
+		operation.groupId = self.groupId
+		operation.appId = self.appId
+		operation.placeholderIds = [self.placeholderId]
 		operation.userContext = ((AudienceTargetingLoader.computeUserContext() + context) as! [String:String])
-
 
 		// TODO retain-cycle on operation?
 		operation.onComplete = {

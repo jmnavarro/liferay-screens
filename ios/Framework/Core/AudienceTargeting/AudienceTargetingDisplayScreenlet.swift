@@ -53,6 +53,9 @@ import UIKit
 		// what if we pass data to be used in rules evaluation in this request?
 		let interactor = AudienceTargetingLoadPlaceholderInteractor(
 				screenlet: self,
+				groupId: self.groupId,
+				appId: self.appId,
+				placeholderId: self.placeholderId,
 				context: context ?? [:])
 
 		// force start here to avoid start-stop-start effects
