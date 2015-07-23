@@ -52,7 +52,7 @@ public struct PlaceholderMapping {
 }
 
 
-public class AudienceTargetingLoadPlaceholderOperation: ServerOperation {
+public class ATLoadPlaceholderOperation: ServerOperation {
 
 	public var appId: String?
 	public var groupId: Int64?
