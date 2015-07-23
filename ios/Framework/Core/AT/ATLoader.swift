@@ -14,12 +14,26 @@
 import UIKit
 
 
+@objc public class ATAsset : NSObject {
+	let className: String
+	let classPK: Int64
+
+	init(className: String, classPK: Int64) {
+		self.className = className
+		self.classPK = classPK
+
+		super.init()
+	}
+}
+
+
 @objc public class ATLoader : NSObject {
 
 	private var groupId: Int64
 	private var appId: String
 
-	private var contentCache: [String: String] = [:]
+	private var customContentCache: [String: String] = [:]
+	private var assetCache: [String: ATAsset] = [:]
 
 	private var lastUserSegmentIds = [Int64]()
 
@@ -49,46 +63,61 @@ import UIKit
 	}
 
 	public func clearCache() {
-		contentCache.removeAll(keepCapacity: true)
+		customContentCache.removeAll(keepCapacity: true)
+		assetCache.removeAll(keepCapacity: true)
 	}
 
 	public func clearCache(#key: String) {
-		contentCache.removeValueForKey(key)
+		customContentCache.removeValueForKey(key)
+		assetCache.removeValueForKey(key)
 	}
 
-	public func hasContentCached(#placeholderId: String) -> Bool {
-		return contentCache[placeholderId] != nil
+	public func isCached(#placeholderId: String) -> Bool {
+		return customContentCache[placeholderId] != nil
+				|| assetCache[placeholderId] != nil
 	}
 
 	public func belongsToSegment(segmentId: Int64) -> Bool {
 		return contains(lastUserSegmentIds, segmentId)
 	}
 
-	public func content(#placeholderId: String,
+	public func customContent(
+			#placeholderId: String,
 			result: (String?, NSError?) -> Void) {
 
-		content(placeholderId: placeholderId, context: [:], result: result)
+		customContent(
+				placeholderId: placeholderId,
+				context: [:],
+				result: result)
 	}
 
-	public func content(#placeholderId: String,
+	public func customContent(
+			#placeholderId: String,
 			context: [String:String],
 			result: (String?, NSError?) -> Void) {
 
-		if let cachedValue = contentCache[placeholderId] {
+		if let cachedValue = customContentCache[placeholderId] {
 			result(cachedValue, nil)
 		}
 		else {
-			loadContent(placeholderId: placeholderId, context: context, result: result)
+			retrieveCustomContent(
+					placeholderId: placeholderId,
+					context: context,
+					result: result)
 		}
 	}
 
-	public func loadContent(
+	public func retrieveCustomContent(
 			#placeholderId: String,
 			result: (String?, NSError?) -> Void) {
-		loadContent(placeholderId: placeholderId, context: [:], result: result)
+
+		retrieveCustomContent(
+				placeholderId: placeholderId,
+				context: [:],
+				result: result)
 	}
 
-	public func loadContent(
+	public func retrieveCustomContent(
 			#placeholderId: String,
 			context: [String:String],
 			result: (String?, NSError?) -> Void) {
@@ -96,27 +125,27 @@ import UIKit
 		let operation = ATLoadPlaceholderOperation()
 
 		operation.groupId = (groupId != 0) ? groupId : LiferayServerContext.groupId
-
 		operation.appId = appId
 		operation.placeholderIds = [placeholderId]
-
 		operation.userContext = ((ATLoader.computeUserContext() + context) as! [String:String])
 
 		// TODO retain-cycle on operation?
 		operation.onComplete = {
+			let loadOp = $0 as! ATLoadPlaceholderOperation
+
 			if let error = $0.lastError {
 				result(nil, error)
 			}
 			else {
-				let loadOp = $0 as! ATLoadPlaceholderOperation
-
 				let placeholderId = loadOp.placeholderIds!.first!
 				let resultMap = loadOp.firstResultForPlaceholderId(placeholderId)
-				self.lastUserSegmentIds = resultMap?.segmentIds ?? self.lastUserSegmentIds
+				self.lastUserSegmentIds = resultMap?.segmentIds
+						?? self.lastUserSegmentIds
 
 				if let customContent = resultMap?.customContent {
-					var localizedContent = customContent[NSLocale.currentLanguageString] ?? customContent["en_US"]
-					self.contentCache[placeholderId] = localizedContent
+					let localizedContent = customContent[NSLocale.currentLanguageString]
+								?? customContent["en_US"]
+					self.customContentCache[placeholderId] = localizedContent
 					result(localizedContent, nil)
 				}
 				else {
@@ -128,6 +157,139 @@ import UIKit
 
 		if !operation.validateAndEnqueue() {
 			result(nil, NSError.errorWithCause(.AbortedDueToPreconditions))
+		}
+	}
+
+	public func assetContent(
+		#placeholderId: String,
+		result: (ATAsset?, NSError?) -> Void) {
+
+			assetContent(
+				placeholderId: placeholderId,
+				context: [:],
+				result: result)
+	}
+
+	public func assetContent(
+		#placeholderId: String,
+		context: [String:String],
+		result: (ATAsset?, NSError?) -> Void) {
+
+			if let cachedValue = assetCache[placeholderId] {
+				result(cachedValue, nil)
+			}
+			else {
+				retrieveAsset(
+					placeholderId: placeholderId,
+					context: context,
+					result: result)
+			}
+	}
+
+	public func retrieveAsset(
+		#placeholderId: String,
+		result: (ATAsset?, NSError?) -> Void) {
+			retrieveAsset(
+				placeholderId: placeholderId,
+				context: [:],
+				result: result)
+	}
+
+	public func retrieveAsset(
+			#placeholderId: String,
+			context: [String:String],
+			result: (ATAsset?, NSError?) -> Void) {
+		let operation = ATLoadPlaceholderOperation()
+
+		operation.groupId = (groupId != 0) ? groupId : LiferayServerContext.groupId
+		operation.appId = appId
+		operation.placeholderIds = [placeholderId]
+		operation.userContext = ((ATLoader.computeUserContext() + context) as! [String:String])
+
+		// TODO retain-cycle on operation?
+		operation.onComplete = {
+			let loadOp = $0 as! ATLoadPlaceholderOperation
+
+			if let error = $0.lastError {
+				result(nil, error)
+			}
+			else {
+				let placeholderId = loadOp.placeholderIds!.first!
+				let resultMap = loadOp.firstResultForPlaceholderId(placeholderId)
+				self.lastUserSegmentIds = resultMap?.segmentIds
+						?? self.lastUserSegmentIds
+
+				if let className = resultMap?.className,
+						classPK = resultMap?.classPK {
+					let asset = ATAsset(className: className, classPK: classPK)
+					self.assetCache[placeholderId] = asset
+					result(asset, nil)
+				}
+				else {
+					// no error, no content
+					result(nil, nil)
+				}
+			}
+		}
+
+		if !operation.validateAndEnqueue() {
+			result(nil, NSError.errorWithCause(.AbortedDueToPreconditions))
+		}
+	}
+
+	public func retrieveAll(
+			#placeholderIds: [String],
+			context: [String:String],
+			onResult: (String, AnyObject?) -> Void,
+			onError: (NSError) -> Void) {
+
+		let operation = ATLoadPlaceholderOperation()
+
+		operation.groupId = (groupId != 0) ? groupId : LiferayServerContext.groupId
+		operation.appId = appId
+		operation.placeholderIds = placeholderIds
+		operation.userContext = ((ATLoader.computeUserContext() + context) as! [String:String])
+
+		// TODO retain-cycle on operation?
+		operation.onComplete = {
+			let loadOp = $0 as! ATLoadPlaceholderOperation
+
+			if let error = $0.lastError {
+				onError(error)
+			}
+			else {
+				let loadOp = $0 as! ATLoadPlaceholderOperation
+
+				for (placeholderId, maps) in loadOp.results! {
+					let map = maps.first!
+
+					self.lastUserSegmentIds = map.segmentIds
+						?? self.lastUserSegmentIds
+
+					if let customContent = map.customContent {
+						let localizedContent = customContent[NSLocale.currentLanguageString]
+								?? customContent["en_US"]
+						self.customContentCache[placeholderId] = localizedContent
+
+						onResult(placeholderId, localizedContent)
+					}
+					else if let className = map.className,
+							classPK = map.classPK {
+						let asset = ATAsset(className: className, classPK: classPK)
+						self.assetCache[placeholderId] = asset
+
+						onResult(placeholderId, asset)
+					}
+					else {
+						// no error, no content
+						onResult(placeholderId, nil)
+					}
+				}
+			}
+		}
+
+		if !operation.validateAndEnqueue() {
+			onError(NSError.errorWithCause(.AbortedDueToPreconditions))
 		}
 	}
 
