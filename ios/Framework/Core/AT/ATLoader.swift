@@ -103,17 +103,7 @@ import UIKit
 
 	public func customContent(
 			#placeholderId: String,
-			result: (String?, NSError?) -> Void) {
-
-		customContent(
-				placeholderId: placeholderId,
-				context: [:],
-				result: result)
-	}
-
-	public func customContent(
-			#placeholderId: String,
-			context: [String:String],
+			context: [String:String]?,
 			result: (String?, NSError?) -> Void) {
 
 		if let cachedValue = customContentCache[placeholderId] {
@@ -129,17 +119,7 @@ import UIKit
 
 	public func retrieveCustomContent(
 			#placeholderId: String,
-			result: (String?, NSError?) -> Void) {
-
-		retrieveCustomContent(
-				placeholderId: placeholderId,
-				context: [:],
-				result: result)
-	}
-
-	public func retrieveCustomContent(
-			#placeholderId: String,
-			context: [String:String],
+			context: [String:String]?,
 			result: (String?, NSError?) -> Void) {
 
 		let operation = ATLoadPlaceholderOperation()
@@ -147,7 +127,7 @@ import UIKit
 		operation.groupId = (groupId != 0) ? groupId : LiferayServerContext.groupId
 		operation.appId = appId
 		operation.placeholderIds = [placeholderId]
-		operation.userContext = ((ATLoader.computeUserContext() + context) as! [String:String])
+		operation.userContext = ((ATLoader.computeUserContext() + (context ?? [:])) as! [String:String])
 
 		// TODO retain-cycle on operation?
 		operation.onComplete = {
@@ -201,17 +181,7 @@ import UIKit
 
 	public func assetContent(
 			#placeholderId: String,
-			result: (ATAsset?, NSError?) -> Void) {
-
-		assetContent(
-				placeholderId: placeholderId,
-				context: [:],
-				result: result)
-	}
-
-	public func assetContent(
-			#placeholderId: String,
-			context: [String:String],
+			context: [String:String]?,
 			result: (ATAsset?, NSError?) -> Void) {
 
 		if let cachedValue = assetCache[placeholderId] {
@@ -227,17 +197,7 @@ import UIKit
 
 	public func retrieveAsset(
 			#placeholderId: String,
-			result: (ATAsset?, NSError?) -> Void) {
-
-		retrieveAsset(
-				placeholderId: placeholderId,
-				context: [:],
-				result: result)
-	}
-
-	public func retrieveAsset(
-			#placeholderId: String,
-			context: [String:String],
+			context: [String:String]?,
 			result: (ATAsset?, NSError?) -> Void) {
 
 		let operation = ATLoadPlaceholderOperation()
@@ -245,7 +205,7 @@ import UIKit
 		operation.groupId = (groupId != 0) ? groupId : LiferayServerContext.groupId
 		operation.appId = appId
 		operation.placeholderIds = [placeholderId]
-		operation.userContext = ((ATLoader.computeUserContext() + context) as! [String:String])
+		operation.userContext = ((ATLoader.computeUserContext() + (context ?? [:])) as! [String:String])
 
 		// TODO retain-cycle on operation?
 		operation.onComplete = {
@@ -298,16 +258,16 @@ import UIKit
 	}
 
 	public func retrieveAll(
-		context: [String:String],
-		onResult: (String, AnyObject?) -> Void,
-		onError: (NSError) -> Void) {
+			#context: [String:String]?,
+			onResult: (String, AnyObject?) -> Void,
+			onError: (NSError) -> Void) {
 
-			retrieveAll(placeholderIds: [], context: context, onResult: onResult, onError: onError)
+		retrieveAll(placeholderIds: [], context: context, onResult: onResult, onError: onError)
 	}
 
 	public func retrieveAll(
 			#placeholderIds: [String],
-			context: [String:String],
+			context: [String:String]?,
 			onResult: (String, AnyObject?) -> Void,
 			onError: (NSError) -> Void) {
 
@@ -316,7 +276,7 @@ import UIKit
 		operation.groupId = (groupId != 0) ? groupId : LiferayServerContext.groupId
 		operation.appId = appId
 		operation.placeholderIds = placeholderIds.isEmpty ? nil : placeholderIds
-		operation.userContext = ((ATLoader.computeUserContext() + context) as! [String:String])
+		operation.userContext = ((ATLoader.computeUserContext() + (context ?? [:])) as! [String:String])
 
 		// TODO retain-cycle on operation?
 		operation.onComplete = {
