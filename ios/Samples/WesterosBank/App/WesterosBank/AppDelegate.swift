@@ -15,7 +15,7 @@ import UIKit
 import LiferayScreens
 
 
-public func audienceTargeting() -> AudienceTargetingLoader {
+public func audienceTargeting() -> ATLoader {
 	return (UIApplication.sharedApplication().delegate as! AppDelegate).audienceTargetingLoader!
 }
 
@@ -25,11 +25,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 	var window: UIWindow?
 
-	var audienceTargetingLoader: AudienceTargetingLoader?
+	var audienceTargetingLoader: ATLoader?
 
 	func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
 
-		audienceTargetingLoader = AudienceTargetingLoader(
+		audienceTargetingLoader = ATLoader(
 				groupId: LiferayServerContext.groupId,
 				appId: NSBundle.mainBundle().bundleIdentifier!)
 

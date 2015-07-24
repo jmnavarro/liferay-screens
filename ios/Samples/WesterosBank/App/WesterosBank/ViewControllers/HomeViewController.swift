@@ -17,7 +17,7 @@ import LiferayScreens
 var tourCompleted = false
 
 
-class HomeViewController: UIViewController, AudienceTargetingDisplayScreenletDelegate {
+class HomeViewController: UIViewController, ATDisplayScreenletDelegate {
 
 	@IBOutlet weak var issuesDeck: CardDeckView!
 	@IBOutlet weak var issuesCard: CardView!
@@ -28,7 +28,7 @@ class HomeViewController: UIViewController, AudienceTargetingDisplayScreenletDel
 	@IBOutlet weak var accountButton: UIButton!
 	@IBOutlet weak var restButtons: UIView!
 
-	@IBOutlet weak var bannerScreenlet: AudienceTargetingDisplayScreenlet!
+	@IBOutlet weak var bannerScreenlet: ATDisplayScreenlet!
 
 
 	var goToAccountSegueName: String = "view-account"
@@ -131,7 +131,7 @@ class HomeViewController: UIViewController, AudienceTargetingDisplayScreenletDel
 			bannerScreenlet.loadContent(
 					context: ["survey":surveyResponse ?? "empty"])
 
-			audienceTargeting().content(
+			audienceTargeting().customContent(
 				placeholderId: "go-to-account",
 				result: { (segueName, error) -> Void in
 					if let segueName = segueName {
@@ -142,7 +142,7 @@ class HomeViewController: UIViewController, AudienceTargetingDisplayScreenletDel
 					}
 				})
 
-			audienceTargeting().content(
+			audienceTargeting().customContent(
 				placeholderId: "persona",
 				context: ["survey":surveyResponse ?? "empty"],
 				result: { (personaName, error) -> Void in
@@ -163,7 +163,7 @@ class HomeViewController: UIViewController, AudienceTargetingDisplayScreenletDel
 					}
 				})
 
-			audienceTargeting().loadContent(
+			audienceTargeting().retrieveCustomContent(
 				placeholderId: "portrait-theme",
 				result: { (value, error) -> Void in
 					// don't do anything, just for caching
@@ -189,7 +189,7 @@ class HomeViewController: UIViewController, AudienceTargetingDisplayScreenletDel
 	}
 
 	func requestForCanReport() {
-		audienceTargeting().content(
+		audienceTargeting().customContent(
 			placeholderId: "can-report",
 			context: ["survey":surveyResponse ?? "empty"],
 			result: { (canReportValue, error) -> Void in
@@ -206,7 +206,7 @@ class HomeViewController: UIViewController, AudienceTargetingDisplayScreenletDel
 	}
 
 	func confirmSurvey() {
-		audienceTargeting().content(
+		audienceTargeting().customContent(
 			placeholderId: "survey-id",
 			context: ["survey":surveyResponse ?? "empty"],
 			result: { (surveyId, error) -> Void in
@@ -323,18 +323,18 @@ class HomeViewController: UIViewController, AudienceTargetingDisplayScreenletDel
 		issuesCard.enabledButton(true)
 	}
 
-	func screenlet(screenlet: AudienceTargetingDisplayScreenlet,
+	func screenlet(screenlet: ATDisplayScreenlet,
 			onAudienceTargetingResponse value: AnyObject,
 			mimeType: String?) {
 		screenlet.hidden = false
 	}
 
 	func screenletOnAudienceTargetingEmptyResponse(
-			screenlet: AudienceTargetingDisplayScreenlet) {
+			screenlet: ATDisplayScreenlet) {
 		screenlet.hidden = true
 	}
 
-	func screenlet(screenlet: AudienceTargetingDisplayScreenlet,
+	func screenlet(screenlet: ATDisplayScreenlet,
 			onAudienceTargetingError error: NSError) {
 		screenlet.hidden = true
 	}

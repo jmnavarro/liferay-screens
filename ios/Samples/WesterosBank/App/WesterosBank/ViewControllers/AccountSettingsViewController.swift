@@ -76,9 +76,9 @@ class AccountSettingsViewController: UIViewController,
 
 		var result = theme
 
-		if audienceTargeting().hasContentCached(placeholderId: "portrait-theme") {
+		if audienceTargeting().isCached(placeholderId: "portrait-theme") {
 			// when the content is cached, the method is sync
-			audienceTargeting().content(
+			audienceTargeting().customContent(
 					placeholderId: "portrait-theme",
 					result: { (themeName, error) -> Void in
 						result = themeName!
