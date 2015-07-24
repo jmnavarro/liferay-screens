@@ -200,35 +200,36 @@ import UIKit
 	}
 
 	public func assetContent(
-		#placeholderId: String,
-		result: (ATAsset?, NSError?) -> Void) {
+			#placeholderId: String,
+			result: (ATAsset?, NSError?) -> Void) {
 
-			assetContent(
+		assetContent(
 				placeholderId: placeholderId,
 				context: [:],
 				result: result)
 	}
 
 	public func assetContent(
-		#placeholderId: String,
-		context: [String:String],
-		result: (ATAsset?, NSError?) -> Void) {
+			#placeholderId: String,
+			context: [String:String],
+			result: (ATAsset?, NSError?) -> Void) {
 
-			if let cachedValue = assetCache[placeholderId] {
-				result(cachedValue, nil)
-			}
-			else {
-				retrieveAsset(
+		if let cachedValue = assetCache[placeholderId] {
+			result(cachedValue, nil)
+		}
+		else {
+			retrieveAsset(
 					placeholderId: placeholderId,
 					context: context,
 					result: result)
-			}
+		}
 	}
 
 	public func retrieveAsset(
-		#placeholderId: String,
-		result: (ATAsset?, NSError?) -> Void) {
-			retrieveAsset(
+			#placeholderId: String,
+			result: (ATAsset?, NSError?) -> Void) {
+
+		retrieveAsset(
 				placeholderId: placeholderId,
 				context: [:],
 				result: result)
@@ -238,6 +239,7 @@ import UIKit
 			#placeholderId: String,
 			context: [String:String],
 			result: (ATAsset?, NSError?) -> Void) {
+
 		let operation = ATLoadPlaceholderOperation()
 
 		operation.groupId = (groupId != 0) ? groupId : LiferayServerContext.groupId
@@ -296,6 +298,14 @@ import UIKit
 	}
 
 	public func retrieveAll(
+		context: [String:String],
+		onResult: (String, AnyObject?) -> Void,
+		onError: (NSError) -> Void) {
+
+			retrieveAll(placeholderIds: [], context: context, onResult: onResult, onError: onError)
+	}
+
+	public func retrieveAll(
 			#placeholderIds: [String],
 			context: [String:String],
 			onResult: (String, AnyObject?) -> Void,
@@ -305,7 +315,7 @@ import UIKit
 
 		operation.groupId = (groupId != 0) ? groupId : LiferayServerContext.groupId
 		operation.appId = appId
-		operation.placeholderIds = placeholderIds
+		operation.placeholderIds = placeholderIds.isEmpty ? nil : placeholderIds
 		operation.userContext = ((ATLoader.computeUserContext() + context) as! [String:String])
 
 		// TODO retain-cycle on operation?

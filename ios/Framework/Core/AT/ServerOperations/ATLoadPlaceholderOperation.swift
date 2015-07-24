@@ -69,7 +69,6 @@ public class ATLoadPlaceholderOperation: ServerOperation {
 
 		valid = valid && (appId ?? "" != "")
 		valid = valid && (groupId != nil)
-		valid = valid && !(placeholderIds ?? []).isEmpty
 		valid = valid && !(userContext ?? [:]).isEmpty
 
 		return valid
@@ -80,12 +79,23 @@ public class ATLoadPlaceholderOperation: ServerOperation {
 
 		lastError = nil
 
-		let result = service.getContentWithAppId(appId!,
-				groupId: groupId!,
-				placeholderIds: placeholderIds!,
-				userContext: userContext!,
-				serviceContext: nil,
-				error: &lastError)
+		var result: [AnyObject]?
+
+		if let placeholderIds = self.placeholderIds {
+			result = service.getContentWithAppId(appId!,
+					groupId: groupId!,
+					placeholderIds: placeholderIds,
+					userContext: userContext!,
+					serviceContext: nil,
+					error: &lastError)
+		}
+		else {
+			result = service.getContentWithAppId(appId!,
+					groupId: groupId!,
+					userContext: userContext!,
+					serviceContext: nil,
+					error: &lastError)
+		}
 
 		if lastError == nil {
 			results = [:]
