@@ -1,18 +1,32 @@
-# Liferay Mobile Widgets
+# Liferay Screens
 
-## Introduction
-Mobile Widgets is the Liferay's effort to speed up and simplify the development of mobile apps that use Liferay Portal as backend.
+[![License](http://img.shields.io/badge/license-LGPL_2.1-red.svg?style=flat-square)](http://opensource.org/licenses/LGPL-2.1) [![Release](http://img.shields.io/badge/release-Beta_3-orange.svg?style=flat-square)](https://github.com/liferay/liferay-screens/releases/) [![Tag](http://img.shields.io/github/tag/liferay/liferay-screens.svg?style=flat-square)](https://github.com/liferay/liferay-screens/tags/)
 
-It's currently possible to develop mobile apps using [Liferay Mobile SDK](https://github.com/liferay/liferay-mobile-sdk "Liferay Mobile SDK"). Mobile SDK is low-level layer on top of Liferay JSON API, so it means that, besides to your iOS or Android experience, you'll need to know what [Liferay's remote services](https://www.liferay.com/documentation/liferay-portal/6.2/development/-/ai/accessing-services-remotely-liferay-portal-6-2-dev-guide-05-en) are and how to make specific calls to them (some services are trivial, but others could be a bit tricky).
-However, if you already know some of those Liferay concepts, don't hesitate to read [Mobile SDK documentation](https://www.liferay.com/documentation/liferay-portal/6.2/development/-/ai/mobile-sdk-to-call-services-liferay-portal-6-2-dev-guide-en) and check whether it's convenient for your needs.
+[![iOS Platform](http://img.shields.io/badge/platform-iOS_7+-blue.svg?style=flat-square)](https://github.com/liferay/liferay-screens/tree/master/ios) [![Build Status](http://img.shields.io/travis/liferay/liferay-screens.svg?style=flat-square)](https://travis-ci.org/liferay/liferay-screens/)
 
-Mobile widgets aim is to hide all the complexity of calling Liferay remote services, just giving to the developer a set of GUI oriented components (widgets). These widgets will make all the server calls under the hood so you don't have to deal with remote services, JSON responses and weird parameters.
-As developer, you'll be able to customize the UI, hide or extend widget's features, or even override the default behaviour to implement specific features in your project.
+[![Android Platform](http://img.shields.io/badge/platform-Android_4.0-green.svg?style=flat-square)](https://github.com/liferay/liferay-screens/tree/master/android) [![Build Status](http://img.shields.io/travis/liferay/liferay-screens.svg?style=flat-square)](https://travis-ci.org/liferay/liferay-screens/)
 
+## Overview
 
-## iOS
+This repository contains the Liferay Screens source code, in addition to several example projects that illustrate how Screens is used. For detailed instructions on developing mobile apps with Screens, see the [Screens documentation on the Liferay Developer Network (LDN)](https://dev.liferay.com/develop/tutorials/-/knowledge_base/6-2/mobile-apps-with-liferay-screens). 
 
-Given that iOS widgets are written for in Swift, and it's currently in Beta version, the process is not as seamless as we'd wish. Instead of release the widgets as a CocoaPods (which is the standard and recommended way), you'll have to include widget's source code into your project. If you have developed apps before CocoaPods appeared, this procedure will be familiar to you. As soon as CocoaPods works fine with Swift, Cocoa frameworks and ObjC-Swift interoperativity, we'll release a Pod to make it easier.
+Brief descriptions of this repository's contents are listed here:
 
-## Android
-TODO
+- `android`: the Liferay Screens for Android codebase, View Sets, and example projects.
+- `ios`: the Liferay Screens for iOS codebase, Themes, and example projects.
+- `portal`: the Liferay Screens compatibility plugin. This should be deployed to any Liferay instances that apps developed with Screens connect to.
+
+## Contributing
+
+Liferay welcomes any and all contributions! Please read the [Liferay Screens Contribution Guide](CONTRIBUTING.md) for details on developing and submitting your contributions.
+
+## License
+
+This library is free software ("Licensed Software"); you can redistribute it and/or modify it under the terms of the [GNU Lesser General Public License](http://www.gnu.org/licenses/lgpl-2.1.html) as
+published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; including but not limited to, the implied warranty of MERCHANTABILITY, NONINFRINGEMENT, or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the [GNU Lesser General Public
+License](http://www.gnu.org/licenses/lgpl-2.1.html) along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+Floor, Boston, MA 02110-1301 USA
