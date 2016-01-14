@@ -96,12 +96,12 @@ public class LoginView_default: BaseScreenletView, LoginViewModel {
 				forState: .Normal)
 	}
 
-	override public func onStartInteraction() {
+	override public func onStartInteraction(actionName: String) {
 		loginButton?.enabled = false
 		authorizeButton?.enabled = false
 	}
 
-	override public func onFinishInteraction(result: AnyObject?, error: NSError?) {
+	override public func onFinishInteraction(actionName: String, result: AnyObject?, error: NSError?) {
 		loginButton?.enabled = true
 		authorizeButton?.enabled = true
 	}

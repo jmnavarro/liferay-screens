@@ -46,7 +46,7 @@ public class DDLFormView_default: DDLFormTableView {
 		self.tableView?.alpha = 0.0
 	}
 
-	override public func onFinishInteraction(result: AnyObject?, error: NSError?) {
+	override public func onFinishInteraction(actionName: String, result: AnyObject?, error: NSError?) {
 		if self.tableView?.alpha == 0 {
 			UIView.animateWithDuration(0.3, animations: {
 				self.tableView!.alpha = 1.0

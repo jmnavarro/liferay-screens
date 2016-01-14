@@ -79,11 +79,11 @@ public class ForgotPasswordView_default: BaseScreenletView, ForgotPasswordViewMo
 
 	}
 
-	override public func onStartInteraction() {
+	override public func onStartInteraction(actionName: String) {
 		requestPasswordButton!.enabled = false
 	}
 
-	override public func onFinishInteraction(result: AnyObject?, error: NSError?) {
+	override public func onFinishInteraction(actionName: String, result: AnyObject?, error: NSError?) {
 		requestPasswordButton!.enabled = true
 
 		if let resultPasswordSent = result as? Bool {

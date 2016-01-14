@@ -42,11 +42,11 @@ public class SignUpView_default: BaseScreenletView, SignUpViewModel {
 		]
 	}
 
-	override public func onStartInteraction() {
+	override public func onStartInteraction(actionName: String) {
 		signUpButton!.enabled = false
 	}
 
-	override public func onFinishInteraction(result: AnyObject?, error: NSError?) {
+	override public func onFinishInteraction(actionName: String, result: AnyObject?, error: NSError?) {
 		signUpButton!.enabled = true
 	}
 

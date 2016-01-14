@@ -240,7 +240,7 @@ import QuartzCore
 	 */
 	public func onAction(name name: String, interactor: Interactor, sender: AnyObject?) -> Bool {
 		onStartInteraction()
-		screenletView?.onStartInteraction()
+		screenletView?.onStartInteraction(name)
 
 		return interactor.start()
 	}
@@ -305,9 +305,11 @@ import QuartzCore
 
 		untrackInteractor(interactor)
 
-		let result: AnyObject? = interactor.interactionResult()
-		onFinishInteraction(result, error: error)
-		screenletView?.onFinishInteraction(result, error: error)
+		onFinishInteraction(interactor.interactionResult(), error: error)
+
+		screenletView?.onFinishInteraction(interactor.actionName ?? BaseScreenlet.DefaultAction,
+			result: interactor.interactionResult(),
+			error: error)
 
 		hideInteractorHUD(error)
 	}

@@ -167,10 +167,10 @@ public class BaseScreenletView: UIView, UITextFieldDelegate {
 	public func onSetTranslations() {
 	}
 
-	public func onStartInteraction() {
+	public func onStartInteraction(actionName: String) {
 	}
 
-	public func onFinishInteraction(result: AnyObject?, error: NSError?) {
+	public func onFinishInteraction(actionName: String, result: AnyObject?, error: NSError?) {
 	}
 
 	public func createProgressPresenter() -> ProgressPresenter? {
