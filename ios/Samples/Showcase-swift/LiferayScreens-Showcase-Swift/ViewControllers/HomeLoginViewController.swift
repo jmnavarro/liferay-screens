@@ -46,21 +46,23 @@ class HomeLoginViewController: UIViewController, LoginScreenletDelegate {
 
 	func screenlet(screenlet: BaseScreenlet,
 			onLoginResponseUserAttributes attributes: [String:AnyObject]) {
-		print("DELEGATE: onLoginResponse called -> \(attributes)\n");
+		print("DELEGATE: onLoginResponse called -> \(attributes)\n")
 		showLogged(animated: true);
 	}
 
 	func screenlet(screenlet: BaseScreenlet,
 			onLoginError error: NSError) {
-		print("DELEGATE: onLoginError called -> \(error)\n");
+		print("DELEGATE: onLoginError called -> \(error)\n")
 	}
 
-	func onScreenletCredentialsSaved(screenlet: BaseScreenlet) {
-		print("DELEGATE: onCredentialsSaved called\n");
+	func screenlet(screenlet: BaseScreenlet,
+			onCredentialsSavedUserAttributes attributes: [String:AnyObject]) {
+		print("DELEGATE: onCredentialsSaved called -> \(attributes)\n")
 	}
 
-	func onScreenletCredentialsLoaded(screenlet: BaseScreenlet) {
-		print("DELEGATE: onCredentialsLoaded called\n");
+	func screenlet(screenlet: LoginScreenlet,
+			onCredentialsLoadedUserAttributes attributes: [String:AnyObject]) {
+		print("DELEGATE: onCredentialsLoaded called -> \(attributes)\n")
 	}
 
 	private func showLogged(animated animated:Bool) {
