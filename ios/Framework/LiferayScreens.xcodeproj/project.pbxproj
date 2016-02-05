@@ -632,7 +632,6 @@
 		88CA80631B25D6EA004C1D59 /* BasicAuthBased.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88CA80621B25D6EA004C1D59 /* BasicAuthBased.swift */; };
 		88CA80641B25D6EA004C1D59 /* BasicAuthBased.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88CA80621B25D6EA004C1D59 /* BasicAuthBased.swift */; };
 		88CA80661B25D72A004C1D59 /* AuthType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88CA80651B25D72A004C1D59 /* AuthType.swift */; };
-		88CA80671B25D72A004C1D59 /* AuthType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88CA80651B25D72A004C1D59 /* AuthType.swift */; };
 		88CA80691B25E505004C1D59 /* OAuthWebViewController_default.xib in Resources */ = {isa = PBXBuildFile; fileRef = 88CA80681B25E505004C1D59 /* OAuthWebViewController_default.xib */; };
 		88CA806A1B25E505004C1D59 /* OAuthWebViewController_default.xib in Resources */ = {isa = PBXBuildFile; fileRef = 88CA80681B25E505004C1D59 /* OAuthWebViewController_default.xib */; };
 		88CA806E1B25EE04004C1D59 /* CredentialsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88CA806D1B25EE04004C1D59 /* CredentialsStore.swift */; };
@@ -3839,7 +3838,6 @@
 				88937CD31C60F57D0033BEBB /* LRCalendarService_v70.m in Sources */,
 				881E63061ACC06B900862B9E /* LoginScreenlet_ByEmail_Tests.swift in Sources */,
 				88937CFA1C60F57D0033BEBB /* LRDDMStructureService_v70.m in Sources */,
-				88CA80671B25D72A004C1D59 /* AuthType.swift in Sources */,
 				88937B671C60F4CB0033BEBB /* LRScreensddlrecordService_v70.m in Sources */,
 				88937D6F1C60F57D0033BEBB /* LRMembershipRequestService_v70.m in Sources */,
 				88937DA81C60F57D0033BEBB /* LRSapentryService_v70.m in Sources */,
