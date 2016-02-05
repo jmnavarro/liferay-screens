@@ -65,3 +65,17 @@ dependencies {
 	androidTestCompile 'com.android.support.test.espresso:espresso-contrib:+'
 	androidTestCompile 'com.android.support.test.espresso:espresso-idling-resource:+'
 }
+
+buildscript {
+	repositories {
+		jcenter()
+	}
+
+	dependencies {
+		classpath 'com.android.tools.build:gradle:2.0.0-alpha9'
+	}
+}
+
+repositories {
+	jcenter()
+}
