@@ -36,7 +36,7 @@ import QuartzCore
 
 	@IBInspectable public var themeName: String? {
 		set {
-			_themeName = (newValue ?? "default").lowercaseString
+			_themeName = newValue?.lowercaseString ?? "default"
 
 			if _runningOnInterfaceBuilder {
 				_themeName = updateCurrentPreviewImage()
@@ -363,8 +363,8 @@ import QuartzCore
 
 				if nibPath != nil {
 					let views = bundle.loadNibNamed(nibName,
-						owner:self,
-						options:nil)
+						owner: self,
+						options: nil)
 
 					assert(views.count > 0, "Malformed xib \(nibName). Without views")
 
@@ -381,8 +381,10 @@ import QuartzCore
 			return foundView
 		}
 
-		if let foundView = tryLoadForTheme("default", inBundles: bundles) {
-			return foundView
+		if _themeName != "default" {
+			if let foundView = tryLoadForTheme("default", inBundles: bundles) {
+				return foundView
+			}
 		}
 
 		print("ERROR: Xib file doesn't found for screenlet '\(ScreenletName(self.dynamicType))' and theme '\(_themeName)'\n")
