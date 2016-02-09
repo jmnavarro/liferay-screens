@@ -34,7 +34,7 @@ public class WebContentDisplayView_default: BaseScreenletView, WebContentDisplay
 		".span2, .span3, .span4, .span6, .span8, .span10 { width: 100%; }"
 
 
-	override public func createProgressPresenter() -> ProgressPresenter {
+	override public func createProgressPresenter() -> ProgressPresenter? {
 		return DefaultProgressPresenter()
 	}
 

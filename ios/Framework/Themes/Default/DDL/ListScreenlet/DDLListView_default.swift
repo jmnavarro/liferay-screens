@@ -67,7 +67,7 @@ public class DDLListView_default: BaseListTableView, DDLListViewModel {
 
 	//MARK: DDLFormTableView
 
-	override public func createProgressPresenter() -> ProgressPresenter {
+	override public func createProgressPresenter() -> ProgressPresenter? {
 		return DefaultProgressPresenter()
 	}
 

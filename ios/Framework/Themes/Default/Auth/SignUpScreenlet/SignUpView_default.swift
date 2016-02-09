@@ -72,7 +72,7 @@ public class SignUpView_default: BaseScreenletView, SignUpViewModel {
 				forState: .Normal)
 	}
 
-	override public func createProgressPresenter() -> ProgressPresenter {
+	override public func createProgressPresenter() -> ProgressPresenter? {
 		return DefaultProgressPresenter()
 	}
 

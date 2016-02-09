@@ -18,7 +18,7 @@ public class AssetListView_default: AssetListTableView {
 
 	//MARK: BaseScreenletView
 
-	override public func createProgressPresenter() -> ProgressPresenter {
+	override public func createProgressPresenter() -> ProgressPresenter? {
 		return DefaultProgressPresenter()
 	}
 

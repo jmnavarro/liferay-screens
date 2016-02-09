@@ -91,7 +91,7 @@ public class ForgotPasswordView_default: BaseScreenletView, ForgotPasswordViewMo
 		}
 	}
 
-	override public func createProgressPresenter() -> ProgressPresenter {
+	override public func createProgressPresenter() -> ProgressPresenter? {
 		return DefaultProgressPresenter()
 	}
 

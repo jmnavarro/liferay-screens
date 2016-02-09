@@ -99,7 +99,7 @@ public class UserPortraitView_default: BaseScreenletView,
 
 	//MARK: BaseScreenletView
 
-	override public func createProgressPresenter() -> ProgressPresenter {
+	override public func createProgressPresenter() -> ProgressPresenter? {
 		return UserPortraitDefaultProgressPresenter(spinner: activityIndicator!)
 	}
 

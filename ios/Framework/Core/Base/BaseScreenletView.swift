@@ -173,7 +173,7 @@ public class BaseScreenletView: UIView, UITextFieldDelegate {
 	public func onFinishInteraction(result: AnyObject?, error: NSError?) {
 	}
 
-	public func createProgressPresenter() -> ProgressPresenter {
+	public func createProgressPresenter() -> ProgressPresenter? {
 		return MBProgressHUDPresenter()
 	}
 

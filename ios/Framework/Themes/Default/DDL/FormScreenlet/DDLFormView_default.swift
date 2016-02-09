@@ -54,7 +54,7 @@ public class DDLFormView_default: DDLFormTableView {
 		}
 	}
 
-	override public func createProgressPresenter() -> ProgressPresenter {
+	override public func createProgressPresenter() -> ProgressPresenter? {
 		return DefaultProgressPresenter()
 	}
 
