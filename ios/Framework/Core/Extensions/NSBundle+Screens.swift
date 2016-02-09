@@ -16,15 +16,29 @@ import Foundation
 
 extension NSBundle {
 
+	public var isFrameworkBundle: Bool {
+		return bundlePath.hasSuffix(".framework")
+	}
+
+	public var isAppBundle: Bool {
+		return bundlePath.hasSuffix(".app")
+	}
+
+	public var isLiferayScreensBundle: Bool {
+		let screensPrefix = "liferayscreens"
+		let bundleName = ((bundleIdentifier ?? "") as NSString).pathExtension.lowercaseString
+
+		return bundleName.hasPrefix(screensPrefix)
+	}
+
 	public class func allBundles(currentClass: AnyClass) -> [NSBundle] {
-		let bundles =
-			[
-				discoverBundles(),
-				bundlesForDefaultTheme(),
-				bundlesForCore(),
-				bundlesForApp(),
-				[NSBundle(forClass: currentClass)]
-			]
+		let bundles = [
+			discoverFrameworkBundles(),
+			bundlesForDefaultTheme(currentClass),
+			bundlesForCore(currentClass),
+			bundlesForApp(currentClass),
+			[NSBundle(forClass: currentClass)]
+		]
 			.flatMap { $0 }
 
 		return bundles.reduce([]) { ac, x in
@@ -32,57 +46,82 @@ extension NSBundle {
 		}
 	}
 
-	public class func discoverBundles() -> [NSBundle] {
-		let allBundles = NSBundle.allFrameworks() 
+	public class func discoverFrameworkBundles() -> [NSBundle] {
+		let allBundles = NSBundle.allFrameworks() + NSBundle.allBundles()
 
-		return allBundles.filter {
-			let screensPrefix = "LiferayScreens"
-			let bundleName = (($0.bundleIdentifier ?? "") as NSString).pathExtension
+		let screensBundles = allBundles.filter {
+			$0.isLiferayScreensBundle
+		}
 
-			return bundleName.characters.count > screensPrefix.characters.count
-					&& bundleName.hasPrefix(screensPrefix)
+		let innerBundles = screensBundles.map {
+			($0.isFrameworkBundle || $0.isAppBundle) ? discoverInnerBundles($0) : [$0]
+		}.flatMap {
+			$0
+		}
+
+		return screensBundles + innerBundles
+	}
+
+	public class func discoverInnerBundles(rootBundle: NSBundle) -> [NSBundle] {
+		let innerBundlesPaths = rootBundle.pathsForResourcesOfType("bundle", inDirectory: nil)
+
+		return innerBundlesPaths.flatMap {
+			NSBundle(path: $0)
+		}.filter {
+			$0 != nil
+		}.map {
+			$0!
 		}
 	}
 
-	public class func bundlesForDefaultTheme() -> [NSBundle] {
-		return [bundleForName("LiferayScreens-default"), bundleForName("LiferayScreens-ee-default")]
+	public class func bundlesForDefaultTheme(currentClass: AnyClass) -> [NSBundle] {
+		return [
+			bundleForName("LiferayScreens-default", forClass: currentClass),
+			bundleForName("LiferayScreens-ee-default", forClass: currentClass)
+		]
 	}
 
-	public class func bundlesForCore() -> [NSBundle] {
-		return [bundleForName("LiferayScreens-core"), bundleForName("LiferayScreens-ee-core")]
+	public class func bundlesForCore(currentClass: AnyClass) -> [NSBundle] {
+		return [
+			bundleForName("LiferayScreens-core", forClass: currentClass),
+			bundleForName("LiferayScreens-ee-core", forClass: currentClass)
+		]
 	}
 
-	public class func bundleForName(name: String) -> NSBundle {
+	public class func bundleForName(name: String, forClass currentClass: AnyClass) -> NSBundle {
+		let currentClassBundle = NSBundle(forClass: currentClass)
 		let frameworkBundle = NSBundle(forClass: BaseScreenlet.self)
-
-		let bundlePath = frameworkBundle.pathForResource(name, ofType: "bundle")
 
 		// In test environment, separated bundles don't exist.
 		// In such case, the frameworkBundle is used
-		return (bundlePath != nil) ? NSBundle(path: bundlePath!)! : frameworkBundle
+		let bundlePath = currentClassBundle.pathForResource(name, ofType: "bundle")
+			?? frameworkBundle.pathForResource(name, ofType: "bundle")
+			?? frameworkBundle.bundlePath
+
+		return NSBundle(path: bundlePath)!
 	}
 
-	public class func bundlesForApp() -> [NSBundle] {
+	public class func bundlesForApp(currentClass: AnyClass) -> [NSBundle] {
 
 		func appFile(path: String) -> String? {
 			let files = try? NSFileManager.defaultManager().contentsOfDirectoryAtPath(path)
 			return (files ?? []).filter {
-					($0 as NSString).pathExtension == "app"
-				}
-				.first
+				($0 as NSString).pathExtension == "app"
+			}
+			.first
 		}
 
 		let components = ((NSBundle.mainBundle().resourcePath ?? "") as NSString).pathComponents ?? []
 
 		if components.last == "Overlays" {
 			// running into IB
-			let coreBundle = bundlesForCore()[0]
+			let coreBundle = bundlesForCore(currentClass)[0]
 
 			if let range = coreBundle.resourcePath?.rangeOfString("Debug-iphonesimulator"),
-					path = coreBundle.resourcePath?.substringToIndex(range.endIndex),
-					appName = appFile(path),
-					appBundle = NSBundle(path: (path as NSString).stringByAppendingPathComponent(appName)) {
-				return [NSBundle.mainBundle(), appBundle]
+				path = coreBundle.resourcePath?.substringToIndex(range.endIndex),
+				appName = appFile(path),
+				appBundle = NSBundle(path: (path as NSString).stringByAppendingPathComponent(appName)) {
+					return [NSBundle.mainBundle(), appBundle]
 			}
 		}
 
