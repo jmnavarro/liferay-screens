@@ -71,6 +71,6 @@ Pod::Spec.new do |s|
 	s.dependency 'MDRadialProgress', '1.3.2'
 
 	# RatingBar
-	s.dependency 'Cosmos', '0.0.1'
+#	s.dependency 'Cosmos', '0.0.1'
 
 end
