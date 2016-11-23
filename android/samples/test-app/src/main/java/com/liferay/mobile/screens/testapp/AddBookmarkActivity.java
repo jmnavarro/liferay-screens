@@ -1,15 +1,16 @@
 package com.liferay.mobile.screens.testapp;
 
 import android.os.Bundle;
-
+import com.liferay.mobile.screens.base.interactor.CustomInteractorListener;
+import com.liferay.mobile.screens.base.interactor.Interactor;
 import com.liferay.mobile.screens.bookmark.AddBookmarkScreenlet;
+import com.liferay.mobile.screens.bookmark.interactor.AddBookmarkInteractor;
 import com.liferay.mobile.screens.bookmark.interactor.AddBookmarkListener;
-import com.liferay.mobile.screens.viewsets.defaultviews.LiferayCrouton;
 
 /**
  * @author Javier Gamarra
  */
-public class AddBookmarkActivity extends ThemeActivity implements AddBookmarkListener {
+public class AddBookmarkActivity extends ThemeActivity implements AddBookmarkListener, CustomInteractorListener {
 
 	@Override
 	protected void onCreate(Bundle state) {
@@ -18,15 +19,21 @@ public class AddBookmarkActivity extends ThemeActivity implements AddBookmarkLis
 
 		AddBookmarkScreenlet screenlet = (AddBookmarkScreenlet) findViewById(R.id.bookmark_screenlet);
 		screenlet.setListener(this);
+		screenlet.setCustomInteractorListener(this);
 	}
 
 	@Override
 	public void onAddBookmarkFailure(Exception exception) {
-
+		error("Error adding bookmark", exception);
 	}
 
 	@Override
 	public void onAddBookmarkSuccess() {
-		LiferayCrouton.info(this, "Bookmark added!");
+		info("Bookmark added!");
+	}
+
+	@Override
+	public Interactor createInteractor(String actionName) {
+		return new AddBookmarkInteractor();
 	}
 }

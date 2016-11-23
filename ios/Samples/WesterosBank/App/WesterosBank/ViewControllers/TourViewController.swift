@@ -24,8 +24,8 @@ class TourViewController: UIViewController, UIScrollViewDelegate {
 		scrollView.contentSize = contentView.frame.size
 
 		page1.frame = scrollView.frame
-		page2.frame = CGRectMake(scrollView.frame.size.width * 1, scrollView.frame.origin.y, scrollView.frame.size)
-		page3.frame = CGRectMake(scrollView.frame.size.width * 2, scrollView.frame.origin.y, scrollView.frame.size)
+		page2.frame = CGRectMake(scrollView.frame.size.width * 1, y: scrollView.frame.origin.y, size: scrollView.frame.size)
+		page3.frame = CGRectMake(scrollView.frame.size.width * 2, y: scrollView.frame.origin.y, size: scrollView.frame.size)
     }
 
 	@IBAction func nextAction(sender: AnyObject) {
@@ -34,8 +34,8 @@ class TourViewController: UIViewController, UIScrollViewDelegate {
 			self.dismissViewControllerAnimated(true, completion: nil)
 		}
 		else {
-			let newX = CGFloat((pageControl.currentPage + 1) * Int(scrollView.frame.size.width.native))
-			let newRect = CGRectMake(newX, scrollView.contentOffset.y, scrollView.frame.size)
+			let newX = CGFloat((pageControl.currentPage + 1) * Int(scrollView.frame.width))
+			let newRect = CGRectMake(newX, y: scrollView.contentOffset.y, size: scrollView.frame.size)
 			scrollView.scrollRectToVisible(newRect, animated: true)
 		}
 	}

@@ -20,19 +20,16 @@ import UIKit
 
 public class DDLFieldDateTableCell_default: DDLBaseFieldTextboxTableCell_default {
 
-	@IBOutlet public var chooseButton: UIButton? {
-		didSet {
-			setButtonDefaultStyle(chooseButton)
+
+	//MARK: UITableViewCell
+
+	public override func  awakeFromNib() {
+		super.awakeFromNib()
+
+		defaultTextField?.onRightButtonClick = { [weak self] in
+			self?.textField?.becomeFirstResponder()
 		}
 	}
-
-
-	//MARK: Actions
-
-	@IBAction private func chooseButtonAction(sender: AnyObject) {
-		textField!.becomeFirstResponder()
-	}
-
 
 	//MARK: DDLBaseFieldTextboxTableCell
 
@@ -51,13 +48,13 @@ public class DDLFieldDateTableCell_default: DDLBaseFieldTextboxTableCell_default
 
 	//MARK: Private methods
 
-	private func setFieldPresenter(field:DDLField) {
+	private func setFieldPresenter(field: DDMField) {
 
 		func onChange(selectedDate:NSDate!) {
 			field.currentValue = selectedDate
 			textField!.text = field.currentValueAsLabel
 
-			let fullRange = NSMakeRange(0, count(textField!.text!))
+			let fullRange = NSMakeRange(0, (textField!.text!).characters.count)
 
 			textField(textField!,
 				shouldChangeCharactersInRange: fullRange,

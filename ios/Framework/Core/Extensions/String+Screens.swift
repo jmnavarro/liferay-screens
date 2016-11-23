@@ -13,18 +13,113 @@
 */
 import Foundation
 
+#if LIFERAY_SCREENS_FRAMEWORK
+	import SMXMLDocument
+#endif
+
+
 extension String {
 
 	public func toSafeFilename() -> String {
-		let regex = NSRegularExpression(
+		let regex = try! NSRegularExpression(
 			pattern: "[^a-zA-Z0-9_]+",
-			options: .allZeros,
-			error: nil)!
+			options: [])
 
 		return regex.stringByReplacingMatchesInString(self,
-			options: .allZeros,
-			range: NSMakeRange(0, count(self)),
+			options: [],
+			range: NSMakeRange(0, self.characters.count),
 			withTemplate: "-")
+	}
+
+	public var asNumber: NSNumber? {
+		guard let number = Int64(self) else {
+			return nil
+		}
+
+		return NSNumber(longLong: number)
+	}
+
+	public var isXml: Bool {
+		return self.hasPrefix("<?xml")
+	}
+
+	public func asLocalized(locale: NSLocale) -> String {
+		guard self.isXml else {
+			return self
+		}
+
+		let data = self.dataUsingEncoding(NSUTF8StringEncoding)
+
+		guard let document = try? SMXMLDocument(data: data) else {
+			return self
+		}
+
+		let defaultLocale = document.attributeNamed("default-locale") ?? "en_US"
+
+		let found =
+			document.deepChildWithAttribute("language-id", value: locale.localeIdentifier)
+			??
+			document.deepChildWithAttribute("language-id", value: defaultLocale)
+
+		return found?.value ?? self
+	}
+
+	public func toHtmlTextWithAttributes(attributes: [String: NSObject]) -> NSAttributedString? {
+
+		//Init text with default paragraph style
+		var text = "<style>p:last-of-type{ margin-bottom: 0px; padding-bottom: 0px; }</style>"
+			+ "<div style=\""
+
+		if let font = attributes[NSFontAttributeName] as? UIFont {
+			text.appendContentsOf("font-family: \(font.fontName);font-size: \(font.pointSize);")
+		}
+
+		if let color = attributes[NSForegroundColorAttributeName] as? UIColor {
+			text.appendContentsOf("color: \(self.toHexString(color));")
+		}
+
+		text.appendContentsOf("\">\(self)</div>")
+
+		let encodedData = text.dataUsingEncoding(NSUTF8StringEncoding)
+
+		if let data = encodedData {
+
+			let attributes = attributes.copyAndMerge([
+				NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType,
+				NSCharacterEncodingDocumentAttribute: NSUTF8StringEncoding,
+			])
+
+			return try! NSAttributedString(data: data, options: attributes, documentAttributes: nil)
+		}
+
+		return nil
+	}
+
+	func toHexString(color: UIColor) -> String {
+		var r:CGFloat = 0
+		var g:CGFloat = 0
+		var b:CGFloat = 0
+		var a:CGFloat = 0
+
+		color.getRed(&r, green: &g, blue: &b, alpha: &a)
+
+		let rgb:Int = (Int)(r*255)<<16 | (Int)(g*255)<<8 | (Int)(b*255)<<0
+
+		return NSString(format:"#%06x", rgb) as String
+	}
+
+	func removeFirstAndLastChars() -> String {
+		if characters.count >= 2 {
+			let range = startIndex.successor()..<endIndex.predecessor()
+			return substringWithRange(range)
+		}
+
+		return self
+	}
+
+	func trim() -> String {
+		return stringByTrimmingCharactersInSet(
+			NSCharacterSet.whitespaceAndNewlineCharacterSet())
 	}
 
 }

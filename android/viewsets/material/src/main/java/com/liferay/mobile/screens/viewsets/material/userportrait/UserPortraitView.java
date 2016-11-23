@@ -19,15 +19,12 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-
 import com.liferay.mobile.screens.viewsets.R;
 
 /**
  * @author Javier Gamarra
  */
-public class UserPortraitView
-	extends com.liferay.mobile.screens.viewsets.defaultviews.userportrait.UserPortraitView {
-
+public class UserPortraitView extends com.liferay.mobile.screens.viewsets.defaultviews.userportrait.UserPortraitView {
 
 	public UserPortraitView(Context context) {
 		super(context);
@@ -56,9 +53,8 @@ public class UserPortraitView
 
 		Canvas canvas = new Canvas(finalBitmap);
 		canvas.drawOval(rect, getPaint(bitmap));
-		canvas.drawOval(rect, getBorderPaint(borderWidth, R.color.material_primary));
+		canvas.drawOval(rect, getBorderPaint(borderWidth, R.color.colorPrimary_material));
 
 		return finalBitmap;
 	}
-
 }

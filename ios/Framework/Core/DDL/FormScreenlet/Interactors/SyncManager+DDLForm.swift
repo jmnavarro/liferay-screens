@@ -75,10 +75,10 @@ extension SyncManager {
 					error: NSError.errorWithCause(.NotAvailable))
 				signal()
 			}
-			else if let localModifiedDate = localRecord.attributes["modifiedDate"] as? NSNumber,
-					remoteModifiedDate = remoteRecord!.attributes["modifiedDate"] as? NSNumber {
+			else if let localModifiedDate = localRecord.attributes["modifiedDate"]?.longLongValue,
+					remoteModifiedDate = remoteRecord!.attributes["modifiedDate"]?.longLongValue {
 
-				if remoteModifiedDate.longLongValue <= localModifiedDate.longLongValue {
+				if remoteModifiedDate <= localModifiedDate {
 					self.sendLocalRecord(
 						record: localRecord,
 						key: key,
@@ -106,7 +106,7 @@ extension SyncManager {
 	}
 
 	private func resolveConflict(
-			#remoteRecord: DDLRecord,
+			remoteRecord remoteRecord: DDLRecord,
 			localRecord: DDLRecord,
 			key: String,
 			attributes: [String:AnyObject],
@@ -157,12 +157,12 @@ extension SyncManager {
 	}
 
 	private func loadRecord(recordId: Int64, result: DDLRecord? -> ()) {
-		let op = LiferayDDLFormRecordLoadOperation(recordId: recordId)
+		let c = LiferayServerContext.connectorFactory.createDDLFormRecordLoadConnector(recordId)
 
-		op.validateAndEnqueue {
-			if let op = $0 as? LiferayDDLFormRecordLoadOperation,
-					recordData = op.resultRecordData,
-					recordAttributes = op.resultRecordAttributes {
+		c.validateAndEnqueue {
+			if let c = $0 as? DDLFormRecordLoadLiferayConnector,
+					recordData = c.resultRecordData,
+					recordAttributes = c.resultRecordAttributes {
 
 				let remoteRecord = DDLRecord(
 					data: recordData,
@@ -182,9 +182,9 @@ extension SyncManager {
 			attributes: [String:AnyObject],
 			signal: Signal) {
 
-		let cachedDocument = localRecord.fieldsBy(type: DDLFieldDocument.self)
+		let cachedDocument = localRecord.fieldsBy(type: DDMFieldDocument.self)
 			.map {
-				$0 as! DDLFieldDocument
+				$0 as! DDMFieldDocument
 			}.filter {
 				return $0.cachedKey != nil
 			}.first
@@ -202,27 +202,13 @@ extension SyncManager {
 			cacheKey: key,
 			record: localRecord)
 
+		self.prepareInteractorForSync(interactor,
+			key: key,
+			attributes: attributes,
+			signal: signal,
+			screenletClassName: ScreenletName(DDLFormScreenlet))
+
 		interactor.cacheStrategy = .RemoteFirst
-
-		interactor.onSuccess = {
-			self.delegate?.syncManager?(self,
-				onItemSyncScreenlet: ScreenletName(DDLFormScreenlet),
-				completedKey: key,
-				attributes: attributes)
-
-			signal()
-		}
-
-		interactor.onFailure = { err in
-			self.delegate?.syncManager?(self,
-				onItemSyncScreenlet: ScreenletName(DDLFormScreenlet),
-				failedKey: key,
-				attributes: attributes,
-				error: err)
-
-			// TODO retry?
-			signal()
-		}
 
 		if !interactor.start() {
 			dispatch_main() {
@@ -238,7 +224,7 @@ extension SyncManager {
 	}
 
 	private func sendLocalDocument(
-			document: DDLFieldDocument,
+			document: DDMFieldDocument,
 			record: DDLRecord,
 			recordKey: String,
 			recordAttributes: [String:AnyObject],
@@ -253,17 +239,17 @@ extension SyncManager {
 				key: document.cachedKey!) { object, attributes in
 
 			if let filePrefix = attributes?["filePrefix"] as? String,
-					folderId = attributes?["folderId"] as? NSNumber,
-					repositoryId = attributes?["repositoryId"] as? NSNumber,
-					groupId = attributes?["groupId"] as? NSNumber {
+					folderId = attributes?["folderId"]?.longLongValue,
+					repositoryId = attributes?["repositoryId"]?.longLongValue,
+					groupId = attributes?["groupId"]?.longLongValue {
 
 				document.currentValue = object
 
 				let interactor = DDLFormUploadDocumentInteractor(
 					filePrefix: filePrefix,
-					repositoryId: repositoryId.longLongValue,
-					groupId: groupId.longLongValue,
-					folderId: folderId.longLongValue,
+					repositoryId: repositoryId,
+					groupId: groupId,
+					folderId: folderId,
 					document: document)
 
 				interactor.cacheStrategy = .CacheFirst

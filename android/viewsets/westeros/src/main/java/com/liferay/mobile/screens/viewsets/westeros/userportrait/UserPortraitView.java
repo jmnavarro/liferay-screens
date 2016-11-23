@@ -16,7 +16,7 @@ package com.liferay.mobile.screens.viewsets.westeros.userportrait;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import com.liferay.mobile.screens.viewsets.westeros.*;
+import com.liferay.mobile.screens.viewsets.westeros.R;
 
 /**
  * @author Javier Gamarra
@@ -27,8 +27,7 @@ public class UserPortraitView extends com.liferay.mobile.screens.viewsets.defaul
 		super(context);
 	}
 
-	public UserPortraitView(
-		Context context, AttributeSet attributes) {
+	public UserPortraitView(Context context, AttributeSet attributes) {
 		super(context, attributes);
 	}
 
@@ -38,7 +37,7 @@ public class UserPortraitView extends com.liferay.mobile.screens.viewsets.defaul
 
 	@Override
 	protected int getDefaultBorderColor() {
-		return R.color.westeros_red;
+		return R.color.colorPrimary_westeros;
 	}
 
 	@Override

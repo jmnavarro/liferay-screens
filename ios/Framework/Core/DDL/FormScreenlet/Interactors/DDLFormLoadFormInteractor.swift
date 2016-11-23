@@ -14,61 +14,66 @@
 import UIKit
 
 
-class DDLFormLoadFormInteractor: ServerReadOperationInteractor {
+class DDLFormLoadFormInteractor: ServerReadConnectorInteractor {
 
 	var resultRecord: DDLRecord?
 	var resultUserId: Int64?
 
-	override func createOperation() -> LiferayDDLFormLoadOperation {
+	override func createConnector() -> ServerConnector {
 		let screenlet = self.screenlet as! DDLFormScreenlet
 
-		let operation = LiferayDDLFormLoadOperation()
-
-		operation.structureId = screenlet.structureId
-
-		return operation
+		return LiferayServerContext.connectorFactory.createDDLFormLoadConnector(screenlet.structureId)
 	}
 
-	override func completedOperation(op: ServerOperation) {
-		if let loadOp = op as? LiferayDDLFormLoadOperation {
-			self.resultRecord = loadOp.resultRecord
-			self.resultUserId = loadOp.resultUserId
+	override func completedConnector(c: ServerConnector) {
+		if let loadCon = c as? DDLFormLoadLiferayConnector {
+			self.resultRecord = loadCon.resultRecord
+			self.resultUserId = loadCon.resultUserId
 		}
 	}
 
 
 	//MARK: Cache methods
 
-	override func writeToCache(op: ServerOperation) {
-		if let loadOp = op as? LiferayDDLFormLoadOperation,
-				record = loadOp.resultRecord,
-				userId = loadOp.resultUserId {
+	override func writeToCache(c: ServerConnector) {
+		guard let cacheManager = SessionContext.currentContext?.cacheManager else {
+			return
+		}
 
-			SessionContext.currentCacheManager?.setClean(
+		if let loadCon = c as? DDLFormLoadLiferayConnector,
+				record = loadCon.resultRecord,
+				userId = loadCon.resultUserId {
+
+			cacheManager.setClean(
 				collection: ScreenletName(DDLFormScreenlet),
-				key: "structureId-\(loadOp.structureId)",
+				key: "structureId-\(loadCon.structureId)",
 				value: record,
 				attributes: [
-					"userId": NSNumber(longLong: userId)])
+					"userId": userId.description])
 		}
 	}
 
-	override func readFromCache(op: ServerOperation, result: AnyObject? -> Void) {
-		if let loadOp = op as? LiferayDDLFormLoadOperation {
-			let cacheMgr = SessionContext.currentCacheManager!
-
-			cacheMgr.getAnyWithAttributes(
-					collection: ScreenletName(DDLFormScreenlet),
-					key: "structureId-\(loadOp.structureId)") {
-				record, attributes in
-
-				loadOp.resultRecord = record as? DDLRecord
-				loadOp.resultUserId = (attributes?["userId"] as? NSNumber)?.longLongValue
-
-				result(loadOp.resultRecord)
-			}
+	override func readFromCache(c: ServerConnector, result: AnyObject? -> ()) {
+		guard let cacheManager = SessionContext.currentContext?.cacheManager else {
+			result(nil)
+			return
 		}
 
+		if let loadCon = c as? DDLFormLoadLiferayConnector {
+			cacheManager.getAnyWithAttributes(
+					collection: ScreenletName(DDLFormScreenlet),
+					key: "structureId-\(loadCon.structureId)") {
+				record, attributes in
+
+				loadCon.resultRecord = record as? DDLRecord
+				loadCon.resultUserId = attributes?["userId"]?.longLongValue
+
+				result(loadCon.resultRecord)
+			}
+		}
+		else {
+			result(nil)
+		}
 	}
 
 }

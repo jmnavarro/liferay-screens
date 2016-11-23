@@ -18,7 +18,7 @@ import MobileCoreServices
 private let xibName = "DDLFieldDocumentlibraryPresenterViewController_default"
 
 
-public class DDLFieldDocumentlibraryPresenterViewController_default:
+public class DDMFieldDocumentlibraryPresenterViewController_default:
 		UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
 	@IBOutlet public var takeNewButton: UIButton?
@@ -36,42 +36,29 @@ public class DDLFieldDocumentlibraryPresenterViewController_default:
 	}
 
 	public convenience init() {
-		func bundleForXib() -> NSBundle? {
-			let bundles = NSBundle.allBundles(
-					DDLFieldDocumentlibraryPresenterViewController_default.self);
-
-			for bundle in bundles {
-				if bundle.pathForResource(xibName, ofType:"nib") != nil {
-					return bundle
-				}
-			}
-
-			return nil
-		}
-
 		self.init(
 			nibName: xibName,
-			bundle: bundleForXib())
+			bundle: NSBundle.bundleForNibName(xibName, currentClass: self.dynamicType))
 
 		imagePicker.delegate = self
 		imagePicker.allowsEditing = false
 		imagePicker.modalPresentationStyle = .CurrentContext
 
 		takeNewButton?.replaceAttributedTitle(
-				LocalizedString("default", "ddlform-upload-picker-take-new", self),
+				LocalizedString("default", key: "ddlform-upload-picker-take-new", obj: self),
 				forState: .Normal)
 		selectPhotoButton?.replaceAttributedTitle(
-				LocalizedString("default", "ddlform-upload-picker-select-photo", self),
+				LocalizedString("default", key: "ddlform-upload-picker-select-photo", obj: self),
 				forState: .Normal)
 		selectVideoButton?.replaceAttributedTitle(
-				LocalizedString("default", "ddlform-upload-picker-select-video", self),
+				LocalizedString("default", key: "ddlform-upload-picker-select-video", obj: self),
 				forState: .Normal)
 		cancelButton?.replaceAttributedTitle(
-				LocalizedString("default", "ddlform-upload-picker-cancel", self),
+				LocalizedString("default", key: "ddlform-upload-picker-cancel", obj: self),
 				forState: .Normal)
 	}
 
-	required public init(coder aDecoder: NSCoder) {
+	required public init?(coder aDecoder: NSCoder) {
 		super.init(coder: aDecoder)
 	}
 
@@ -83,26 +70,24 @@ public class DDLFieldDocumentlibraryPresenterViewController_default:
 	}
 
 	@IBAction private func takePhotoAction(sender: AnyObject) {
-		cancelButtonAction(sender)
-
 		imagePicker.sourceType = .Camera
 
 		presentViewController(imagePicker, animated: true) {}
 	}
 
 	@IBAction private func selectPhotosAction(sender: AnyObject) {
-		cancelButtonAction(sender)
-
 		imagePicker.sourceType = .SavedPhotosAlbum
+
+		// Reset media types to default
+		imagePicker.mediaTypes = [kUTTypeImage as String]
 
 		presentViewController(imagePicker, animated: true) {}
 	}
 
 	@IBAction private func selectVideosAction(sender: AnyObject) {
-		cancelButtonAction(sender)
 
 		imagePicker.sourceType = .SavedPhotosAlbum
-		imagePicker.mediaTypes = [kUTTypeMovie as NSString]
+		imagePicker.mediaTypes = [kUTTypeMovie as NSString as String]
 
 		presentViewController(imagePicker, animated: true) {}
 	}
@@ -112,7 +97,7 @@ public class DDLFieldDocumentlibraryPresenterViewController_default:
 
     public func imagePickerController(
 			picker: UIImagePickerController,
-			didFinishPickingMediaWithInfo info: [NSObject : AnyObject]) {
+			didFinishPickingMediaWithInfo info: [String : AnyObject]) {
 
 		let selectedImage = info[UIImagePickerControllerOriginalImage] as? UIImage
 		let selectedURL = info[UIImagePickerControllerMediaURL] as? NSURL
@@ -123,6 +108,7 @@ public class DDLFieldDocumentlibraryPresenterViewController_default:
 	}
 
     public func imagePickerControllerDidCancel(picker: UIImagePickerController) {
+		cancelButtonAction(picker)
 		imagePicker.dismissViewControllerAnimated(true) {}
 	}
 

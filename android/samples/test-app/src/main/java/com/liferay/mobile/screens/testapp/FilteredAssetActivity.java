@@ -2,12 +2,9 @@ package com.liferay.mobile.screens.testapp;
 
 import android.os.Bundle;
 import android.view.View;
-
-import com.liferay.mobile.screens.assetlist.AssetEntry;
-import com.liferay.mobile.screens.assetlist.AssetListScreenlet;
+import com.liferay.mobile.screens.asset.AssetEntry;
+import com.liferay.mobile.screens.asset.list.AssetListScreenlet;
 import com.liferay.mobile.screens.base.list.BaseListListener;
-import com.liferay.mobile.screens.base.list.BaseListScreenlet;
-
 import java.util.List;
 
 public class FilteredAssetActivity extends ThemeActivity implements BaseListListener<AssetEntry> {
@@ -22,12 +19,12 @@ public class FilteredAssetActivity extends ThemeActivity implements BaseListList
 	}
 
 	@Override
-	public void onListPageFailed(BaseListScreenlet source, int page, Exception e) {
+	public void onListPageFailed(int startRow, Exception e) {
 
 	}
 
 	@Override
-	public void onListPageReceived(BaseListScreenlet source, int page, List<AssetEntry> entries, int rowCount) {
+	public void onListPageReceived(int startRow, int endRow, List<AssetEntry> entries, int rowCount) {
 
 	}
 
@@ -37,17 +34,7 @@ public class FilteredAssetActivity extends ThemeActivity implements BaseListList
 	}
 
 	@Override
-	public void loadingFromCache(boolean success) {
-
-	}
-
-	@Override
-	public void retrievingOnline(boolean triedInCache, Exception e) {
-
-	}
-
-	@Override
-	public void storingToCache(Object object) {
+	public void error(Exception e, String userAction) {
 
 	}
 }

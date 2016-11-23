@@ -14,116 +14,222 @@
 import UIKit
 
 
-public class BaseListPageLoadInteractor: ServerReadOperationInteractor {
-
+public class BaseListPageLoadInteractor: ServerReadConnectorInteractor {
+	
 	public let page: Int
 	public let computeRowCount: Bool
 
-	public var resultAllPagesContent: [AnyObject?]?
-	public var resultPageContent: [AnyObject]?
+	public var obcClassName: String?
+	
+	public var resultAllPagesContent: [String : [AnyObject?]]?
+	public var resultPageContent: [String : [AnyObject]]?
 	public var resultRowCount: Int?
-
-
+	public var sections: [String]?
+	
+	
+	
 	public init(screenlet: BaseListScreenlet, page: Int, computeRowCount: Bool) {
 		self.page = page
 		self.computeRowCount = computeRowCount
-
 		super.init(screenlet: screenlet)
 	}
 
-	override public func createOperation() -> LiferayPaginationOperation {
-		fatalError("createOperation must be overriden")
+	override public func createConnector() -> PaginationLiferayConnector {
+		let connector = createListPageConnector()
+
+		connector.obcClassName = self.obcClassName
+
+		return connector
+	}
+	
+	override public func completedConnector(c: ServerConnector) {
+		if let pageCon = c as? PaginationLiferayConnector {
+			processLoadPageResult(pageCon.resultPageContent ?? [], rowCount: pageCon.resultRowCount)
+		}
 	}
 
-	override public func completedOperation(op: ServerOperation) {
-		if op.lastError != nil {
-			return
-		}
-
-		if let pageOp = op as? LiferayPaginationOperation {
-			processLoadPageResult(pageOp.resultPageContent ?? [], rowCount: pageOp.resultRowCount)
-		}
+	public func createListPageConnector() -> PaginationLiferayConnector {
+		fatalError("createListPageConnector must be overriden")
 	}
-
-	private func processLoadPageResult(serverRows: [[String:AnyObject]], rowCount: Int?) {
+	
+	public func processLoadPageResult(serverRows: [[String : AnyObject]], rowCount: Int?) {
 		let screenlet = self.screenlet as! BaseListScreenlet
 		let baseListView = screenlet.screenletView as! BaseListView
-
-		let actualRowCount = rowCount ?? baseListView.rowCount
-
+		
+		let actualRowCount = rowCount ?? baseListView.rows[BaseListView.DefaultSection]!.count
+		
 		let convertedRows = serverRows.map() { self.convertResult($0) }
-
-		var allRows = Array<AnyObject?>(count: actualRowCount, repeatedValue: nil)
-
-		for (index, row) in enumerate(baseListView.rows) {
-			allRows[index] = row
+		
+		var allRows = baseListView.rows
+		var convertedRowsWithSection = [String : [AnyObject]]()
+		var sections = baseListView.sections
+		
+		let isFirstPage = (page == 0)
+		let isPageFull = isFirstPage
+				? (convertedRows.count == screenlet.firstPageSize)
+				: (convertedRows.count == screenlet.pageSize)
+		
+		var hasSections = (sections.count > 1) || (sections.count == 1 && sections.first != BaseListView.DefaultSection)
+		
+		// Fill sections
+		if isFirstPage || hasSections  {
+			
+			// Group rows loop
+			for obj in convertedRows {
+				let sectionName = sectionForRowObject(obj) ?? BaseListView.DefaultSection
+				
+				if convertedRowsWithSection.indexForKey(sectionName) == nil {
+					convertedRowsWithSection[sectionName] = [AnyObject]()
+					
+					if !sections.contains(sectionName) {
+						sections.append(sectionName)
+						
+						if sectionName != BaseListView.DefaultSection {
+							hasSections = true
+						}
+					}
+				}
+				
+				if hasSections && sectionName == BaseListView.DefaultSection {
+					print("ERROR: you returned mixed empty and non-empty sections in sectionForRowObject()")
+				}
+				
+				convertedRowsWithSection[sectionName]!.append(obj)
+			}
 		}
-
-		var offset = screenlet.firstRowForPage(page)
-
-		// last page could be incomplete
-		if offset >= actualRowCount {
-			offset = actualRowCount - 1
+		else {
+			// Without sections simply assign incoming rows to the default section
+			convertedRowsWithSection[BaseListView.DefaultSection] = convertedRows
 		}
-
-		for (index, row) in enumerate(convertedRows) {
-			allRows[offset + index] = row
+		
+		// StreamMode is only decided by the interactor in the first page load
+		// otherwise this state could be changed for other interactors
+		if isFirstPage && (hasSections || rowCount == nil) {
+			screenlet.streamMode = true
 		}
-
+		
+		//Fill rows
+		if screenlet.streamMode {
+			allRows = baseListView.rows
+		
+			for section in convertedRowsWithSection.keys {
+				if allRows.indexForKey(section) == nil {
+					allRows[section] = [AnyObject?]()
+				}
+				
+				let rowsInSection = convertedRowsWithSection[section]!
+				
+				for row in rowsInSection {
+					allRows[section]!.append(row)
+				}
+			}
+		}
+		else {
+			//If we reach this point we will have only one section with key ""
+			allRows[BaseListView.DefaultSection] = Array<AnyObject?>(count: actualRowCount, repeatedValue: nil)
+			
+			//Insert existing elements in the list
+			for (index, row) in baseListView.rows[BaseListView.DefaultSection]!.enumerate() {
+				allRows[BaseListView.DefaultSection]![index] = row
+			}
+			
+			let offset = screenlet.firstRowForPage(page)
+			var lastIndexInserted = 0
+			
+			//Insert new elements
+			for (index, row) in convertedRows.enumerate() {
+				if index + offset < actualRowCount {
+					allRows[BaseListView.DefaultSection]![index + offset] = row
+					lastIndexInserted = index + offset
+				}
+				else {
+					allRows[BaseListView.DefaultSection]!.append(row)
+				}
+			}
+			
+			let lessItemsThanExpected = (lastIndexInserted + 1 < actualRowCount)
+			let incompleteMiddlePage = (!isPageFull && !isFirstPage)
+			
+			let streamMode = screenlet.streamMode
+			
+			//Deleted elements since row count computation
+			if lessItemsThanExpected && !streamMode && incompleteMiddlePage {
+				for _ in lastIndexInserted+1..<actualRowCount {
+					allRows[BaseListView.DefaultSection]!.popLast()
+				}
+			}
+		}
+		
 		self.resultRowCount = actualRowCount
-		self.resultPageContent = convertedRows
+		self.resultPageContent = convertedRowsWithSection
 		self.resultAllPagesContent = allRows
+		self.sections = sections
 	}
-
+	
 	public func convertResult(serverResult: [String:AnyObject]) -> AnyObject {
 		fatalError("convert(serverResult) must be overriden")
 	}
-
-
+	
+	public func sectionForRowObject(object: AnyObject) -> String? {
+		return nil
+	}
+	
 	//MARK: Cache
-
-	override public func readFromCache(op: ServerOperation, result: AnyObject? -> Void) {
-		if let loadOp = op as? LiferayPaginationOperation {
-			let key = cacheKey(loadOp)
-			SessionContext.currentCacheManager!.getSome(
-					collection: ScreenletName(screenlet!.dynamicType),
-					keys: ["\(key)-\(page)", "\(key)-\(page)-count"]) {
-
-				loadOp.resultPageContent = $0.first as? [[String:AnyObject]]
-				if count($0) > 1 {
-					loadOp.resultRowCount = $0.last as? Int
-				}
-
-				result(loadOp.resultPageContent)
+	
+	override public func readFromCache(c: ServerConnector, result: AnyObject? -> ()) {
+		guard let cacheManager = SessionContext.currentContext?.cacheManager else {
+			result(nil)
+			return
+		}
+		
+		if let loadCon = c as? PaginationLiferayConnector {
+			let key = cacheKey(loadCon)
+			cacheManager.getSome(
+				collection: ScreenletName(screenlet!.dynamicType),
+				keys: ["\(key)-\(page)", "\(key)-count"]) {
+					
+					loadCon.resultPageContent = $0.first as? [[String:AnyObject]]
+					if $0.count > 1 {
+						loadCon.resultRowCount = $0.last as? Int
+					}
+					
+					result(loadCon.resultPageContent)
 			}
 		}
+		else {
+			result(nil)
+		}
 	}
-
-	override public func writeToCache(op: ServerOperation) {
-		if let loadOp = op as? LiferayPaginationOperation,
-				pageContent = loadOp.resultPageContent
-				where !pageContent.isEmpty {
-
-			let key = cacheKey(loadOp)
-
-			SessionContext.currentCacheManager?.setClean(
+	
+	override public func writeToCache(c: ServerConnector) {
+		guard let cacheManager = SessionContext.currentContext?.cacheManager else {
+			return
+		}
+		
+		if let loadCon = c as? PaginationLiferayConnector,
+			pageContent = loadCon.resultPageContent
+			where !pageContent.isEmpty {
+			
+			let key = cacheKey(loadCon)
+			
+			cacheManager.setClean(
 				collection: ScreenletName(screenlet!.dynamicType),
 				key: "\(key)-\(page)",
 				value: pageContent,
 				attributes: [:])
-
-			if let rowCount = loadOp.resultRowCount {
-				SessionContext.currentCacheManager?.setClean(
+			
+			if let rowCount = loadCon.resultRowCount {
+				cacheManager.setClean(
 					collection: ScreenletName(screenlet!.dynamicType),
-					key: "\(key)-\(page)-count",
+					key: "\(key)-count",
 					value: rowCount,
 					attributes: [:])
 			}
 		}
 	}
-
-	public func cacheKey(op: LiferayPaginationOperation) -> String {
+	
+	public func cacheKey(c: PaginationLiferayConnector) -> String {
 		fatalError("cacheKey must be overriden")
 	}
-
+	
 }

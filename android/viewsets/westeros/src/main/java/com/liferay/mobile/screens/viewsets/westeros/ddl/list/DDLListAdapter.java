@@ -1,4 +1,4 @@
-package com.liferay.mobile.screens.viewsets.westeros.ddl.list; /**
+/**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  * <p/>
  * This library is free software; you can redistribute it and/or modify it under
@@ -12,136 +12,115 @@ package com.liferay.mobile.screens.viewsets.westeros.ddl.list; /**
  * details.
  */
 
+package com.liferay.mobile.screens.viewsets.westeros.ddl.list;
+
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.daimajia.swipe.SwipeLayout;
-import com.liferay.mobile.screens.ddl.model.Record;
-import com.liferay.mobile.screens.viewsets.westeros.*;
 import com.liferay.mobile.screens.base.list.BaseListAdapter;
 import com.liferay.mobile.screens.base.list.BaseListAdapterListener;
-
+import com.liferay.mobile.screens.ddl.model.Record;
+import com.liferay.mobile.screens.viewsets.westeros.R;
 import java.text.SimpleDateFormat;
-import java.util.List;
+import java.util.Locale;
 
 /**
  * @author Javier Gamarra
  * @author Silvio Santos
  */
-public class DDLListAdapter
-        extends BaseListAdapter<Record, DDLListAdapter.SwipeActionsViewHolder> {
+public class DDLListAdapter extends BaseListAdapter<Record, DDLListAdapter.SwipeActionsViewHolder> {
 
-    public static class SwipeActionsViewHolder
-            extends BaseListAdapter.ViewHolder implements View.OnClickListener {
+	public DDLListAdapter(int layoutId, int progressLayoutId, BaseListAdapterListener listener) {
 
-        public SwipeActionsViewHolder(View view, BaseListAdapterListener listener) {
-            super(view, listener);
+		super(layoutId, progressLayoutId, listener);
+	}
 
-            this._subtitleTextView = (TextView) view.findViewById(R.id.liferay_list_subtitle);
-            this._stateIconView = (ImageView) view.findViewById(R.id.liferay_state_list_icon);
+	@Override
+	public SwipeActionsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+		LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
-            _listener = listener;
+		View view;
 
-            view.setOnClickListener(this);
-            view.findViewById(R.id.liferay_list_edit).setOnClickListener(this);
-            view.findViewById(R.id.liferay_list_view).setOnClickListener(this);
-            _swipeLayout = (SwipeLayout) view.findViewById(R.id.liferay_swipe_layout);
+		if (viewType == LAYOUT_TYPE_DEFAULT) {
+			view = inflater.inflate(getLayoutId(), parent, false);
+			SwipeLayout swipe = (SwipeLayout) view.findViewById(R.id.liferay_swipe_layout);
+			swipe.setShowMode(SwipeLayout.ShowMode.LayDown);
+			swipe.setDragEdge(SwipeLayout.DragEdge.Right);
+		} else {
+			view = inflater.inflate(getProgressLayoutId(), parent, false);
+		}
 
-        }
+		return new SwipeActionsViewHolder(view, getListener());
+	}
 
-        @Override
-        public void onClick(View v) {
-            boolean opened = SwipeLayout.Status.Open.equals(_swipeLayout.getOpenStatus());
-            if (opened &&
-                (v.getId() == R.id.liferay_list_edit
-                    || v.getId() == R.id.liferay_list_view)) {
+	@NonNull
+	@Override
+	public SwipeActionsViewHolder createViewHolder(View view, BaseListAdapterListener listener) {
+		return new SwipeActionsViewHolder(view, listener);
+	}
 
-                _listener.onItemClick(getPosition(), v);
-            }
-            else if (!opened) {
-                _swipeLayout.open(true);
-            }
-            else {
-                _swipeLayout.close(true);
-            }
-        }
+	@Override
+	protected void fillHolder(Record entry, SwipeActionsViewHolder holder) {
 
-        private final BaseListAdapterListener _listener;
-        private final TextView _subtitleTextView;
-        private final ImageView _stateIconView;
-        private final SwipeLayout _swipeLayout;
+		StringBuilder builder = new StringBuilder();
 
-    }
+		if (entry != null && getLabelFields() != null && !getLabelFields().isEmpty()) {
 
-    public DDLListAdapter(
-            int layoutId, int progressLayoutId, BaseListAdapterListener listener) {
+			String titleField = (String) entry.getServerValue(getLabelFields().get(0));
 
-        super(layoutId, progressLayoutId, listener);
-    }
+			for (int i = 1; i < getLabelFields().size(); ++i) {
+				String field = getLabelFields().get(i);
+				String value = (String) entry.getServerValue(field);
+				if (value != null && !value.isEmpty()) {
+					builder.append(value);
+					builder.append(" ");
+				}
+			}
+			if (builder.length() == 0) {
+				String date =
+					new SimpleDateFormat("dd/MM/yyyy", Locale.US).format(entry.getServerAttribute("createDate"));
+				builder.append("Created ");
+				builder.append(date);
+			}
 
-    public void setLabelFields(List<String> labelFields) {
-        _labelFields = labelFields;
-    }
+			holder.textView.setText(titleField);
+			holder.subtitleTextView.setText(builder.toString());
+		}
+	}
 
-    @Override
-    public SwipeActionsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+	public static class SwipeActionsViewHolder extends BaseListAdapter.ViewHolder implements View.OnClickListener {
 
-        View view;
+		private final BaseListAdapterListener listener;
+		private final TextView subtitleTextView;
+		private final SwipeLayout swipeLayout;
 
-        if (viewType == LAYOUT_TYPE_DEFAULT) {
-            view = inflater.inflate(getLayoutId(), parent, false);
-            SwipeLayout swipe = (SwipeLayout) view.findViewById(R.id.liferay_swipe_layout);
-            swipe.setShowMode(SwipeLayout.ShowMode.LayDown);
-            swipe.setDragEdge(SwipeLayout.DragEdge.Right);
-        }
-        else {
-            view = inflater.inflate(getProgressLayoutId(), parent, false);
-        }
+		public SwipeActionsViewHolder(View view, BaseListAdapterListener listener) {
+			super(view, listener);
 
-        return new SwipeActionsViewHolder(view, getListener());
-    }
+			this.subtitleTextView = (TextView) view.findViewById(R.id.liferay_list_subtitle);
 
-    @Override
-    protected void fillHolder(Record entry, SwipeActionsViewHolder holder) {
+			this.listener = listener;
 
-        StringBuilder builder = new StringBuilder();
+			view.setOnClickListener(this);
+			view.findViewById(R.id.liferay_list_edit).setOnClickListener(this);
+			view.findViewById(R.id.liferay_list_view).setOnClickListener(this);
+			swipeLayout = (SwipeLayout) view.findViewById(R.id.liferay_swipe_layout);
+		}
 
-        if (entry != null && _labelFields != null && !_labelFields.isEmpty()) {
+		@Override
+		public void onClick(View v) {
+			boolean opened = SwipeLayout.Status.Open.equals(swipeLayout.getOpenStatus());
+			if (opened && (v.getId() == R.id.liferay_list_edit || v.getId() == R.id.liferay_list_view)) {
 
-            String titleField = entry.getServerValue(_labelFields.get(0));
-
-            for (int i = 1; i < _labelFields.size(); ++i) {
-                String field = _labelFields.get(i);
-                String value = entry.getServerValue(field);
-                if (value != null && !value.isEmpty()) {
-                    builder.append(value);
-                    builder.append(" ");
-                }
-            }
-            if (builder.length() == 0) {
-                String date = new SimpleDateFormat("dd/MM/yyyy").format(entry.getServerAttribute("createDate"));
-                builder.append("Created ");
-                builder.append(date);
-            }
-
-            holder.textView.setText(titleField);
-            holder._subtitleTextView.setText(builder.toString());
-
-            int drawableId = getDrawable(getEntries().indexOf(entry));
-            if (holder._stateIconView != null) {
-                holder._stateIconView.setImageResource(drawableId);
-            }
-        }
-    }
-
-    protected int getDrawable(int position) {
-        return 0;
-    }
-
-    private List<String> _labelFields;
-
+				listener.onItemClick(getAdapterPosition(), v);
+			} else if (!opened) {
+				swipeLayout.open(true);
+			} else {
+				swipeLayout.close(true);
+			}
+		}
+	}
 }

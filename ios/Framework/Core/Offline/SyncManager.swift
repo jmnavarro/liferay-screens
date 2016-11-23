@@ -55,6 +55,9 @@ import Foundation
 }
 
 
+public typealias OfflineSynchronizer = (String, [String:AnyObject]) -> Signal -> ()
+
+
 @objc public class SyncManager: NSObject {
 
 	public weak var delegate: SyncManagerDelegate?
@@ -62,6 +65,8 @@ import Foundation
 	public let cacheManager: CacheManager
 
 	private let syncQueue: NSOperationQueue
+	private var synchronizers: [String:OfflineSynchronizer] = [:]
+
 
 	public init(cacheManager: CacheManager) {
 		self.cacheManager = cacheManager
@@ -70,6 +75,24 @@ import Foundation
 		self.syncQueue.maxConcurrentOperationCount = 1
 
 		super.init()
+
+		synchronizers[ScreenletName(UserPortraitScreenlet)] =  userPortraitSynchronizer
+		synchronizers[ScreenletName(DDLFormScreenlet)] =  formSynchronizer
+		synchronizers[ScreenletName(ImageGalleryScreenlet)] = imageGallerySynchronizer
+		synchronizers["CommentsScreenlet"] = commentsSynchronizer
+		synchronizers["RatingsScreenlet"] = ratingsSynchronizer
+	}
+
+	public func addSynchronizer(
+			screenletClass: AnyClass,
+			synchronizer: OfflineSynchronizer) {
+		addSynchronizerWithName(ScreenletName(screenletClass), synchronizer: synchronizer)
+	}
+
+	public func addSynchronizerWithName(
+			screenletClassName: String,
+			synchronizer: OfflineSynchronizer) {
+		synchronizers[screenletClassName] = synchronizer
 	}
 
 	public func clear() {
@@ -81,7 +104,7 @@ import Foundation
 			self.delegate?.syncManager?(self, itemsCount: count)
 
 			if count > 0 {
-				self.cacheManager.pendingToSync { (screenlet, key, attributes) -> Bool in
+				self.cacheManager.pendingToSync({ (screenlet, key, attributes) -> Bool in
 					self.delegate?.syncManager?(self,
 						onItemSyncScreenlet: screenlet,
 						startKey: key,
@@ -90,8 +113,39 @@ import Foundation
 					self.enqueueSyncForScreenlet(screenlet, key, attributes)
 
 					return true
-				}
+				})
 			}
+		}
+	}
+
+	public func prepareInteractorForSync(
+			interactor: ServerConnectorInteractor,
+			key: String,
+			attributes: [String:AnyObject],
+			signal: Signal,
+			screenletClassName: String) {
+
+		// this strategy saves the send date after the connector
+		interactor.cacheStrategy = .CacheFirst
+
+		interactor.onSuccess = {
+			self.delegate?.syncManager?(self,
+				onItemSyncScreenlet: screenletClassName,
+				completedKey: key,
+				attributes: attributes)
+
+			signal()
+		}
+
+		interactor.onFailure = { (err: NSError) in
+			self.delegate?.syncManager?(self,
+				onItemSyncScreenlet: screenletClassName,
+				failedKey: key,
+				attributes: attributes,
+				error: err)
+
+			// TODO retry?
+			signal()
 		}
 	}
 
@@ -100,13 +154,8 @@ import Foundation
 			_ key: String,
 			_ attributes: [String:AnyObject]) {
 
-		let syncBuilders = [
-				ScreenletName(UserPortraitScreenlet): userPortraitSynchronizer,
-				ScreenletName(DDLFormScreenlet): formSynchronizer,
-			]
-
-		if let syncBuilder = syncBuilders[screenletName] {
-			let synchronizer = syncBuilder(key, attributes: attributes)
+		if let syncBuilder = synchronizers[screenletName] {
+			let synchronizer = syncBuilder(key, attributes)
 			syncQueue.addOperationWithBlock(to_sync(synchronizer))
 		}
 	}

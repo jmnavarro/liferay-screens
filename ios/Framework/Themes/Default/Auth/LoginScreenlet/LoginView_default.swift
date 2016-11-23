@@ -16,51 +16,32 @@ import UIKit
 
 public class LoginView_default: BaseScreenletView, LoginViewModel {
 
-	@IBOutlet public weak var userNameIcon: UIImageView!
-	@IBOutlet public weak var userNameField: UITextField!
-	@IBOutlet public weak var passwordField: UITextField!
-	@IBOutlet public weak var rememberSwitch: UISwitch!
-	@IBOutlet public weak var loginButton: UIButton!
-	@IBOutlet public weak var userNameBackground: UIImageView!
-	@IBOutlet public weak var passwordBackground: UIImageView!
-	@IBOutlet public weak var authorizeButton: UIButton!
+	@IBOutlet public weak var userNameField: UITextField?
+	@IBOutlet public weak var passwordField: UITextField?
+	@IBOutlet public weak var loginButton: UIButton?
+	@IBOutlet public weak var authorizeButton: UIButton?
 
 	override public var progressMessages: [String:ProgressMessages] {
 		return [
-			BaseScreenlet.DefaultAction :
-				[.Working : LocalizedString("default", "login-loading-message", self),
-				.Failure : LocalizedString("default", "login-loading-error", self)]]
+			BaseScreenlet.DefaultAction : [
+				.Working : LocalizedString("default", key: "login-loading-message", obj: self),
+				.Failure : LocalizedString("default", key: "login-loading-error", obj: self)]
+		]
 	}
 
 
 	//MARK: AuthBasedViewModel
-
-	public var saveCredentials: Bool {
-		get {
-			if let rememberSwitchValue = rememberSwitch {
-				return rememberSwitchValue.on;
-			}
-
-			return false
-		}
-		set {
-			if let rememberSwitchValue = rememberSwitch {
-				rememberSwitchValue.on = newValue
-			}
-		}
-	}
 
 	public var basicAuthMethod: String? = BasicAuthMethod.Email.rawValue {
 		didSet {
 			setBasicAuthMethodStyles(
 					view: self,
 					basicAuthMethod: BasicAuthMethod.create(basicAuthMethod),
-					userNameField: userNameField,
-					userNameIcon: userNameIcon)
+					userNameField: userNameField)
 		}
 	}
 
-	public var authType: String? = AuthType.Basic.rawValue {
+	public var authType: String? = StringFromAuthType(AuthType.Basic) {
 		didSet {
 			configureAuthType()
 		}
@@ -71,7 +52,7 @@ public class LoginView_default: BaseScreenletView, LoginViewModel {
 
 	public var userName: String? {
 		get {
-			return nullIfEmpty(userNameField.text)
+			return nullIfEmpty(userNameField?.text)
 		}
 		set {
 			userNameField?.text = newValue
@@ -80,7 +61,7 @@ public class LoginView_default: BaseScreenletView, LoginViewModel {
 
 	public var password: String? {
 		get {
-			return nullIfEmpty(passwordField.text)
+			return nullIfEmpty(passwordField?.text)
 		}
 		set {
 			passwordField?.text = newValue
@@ -100,12 +81,15 @@ public class LoginView_default: BaseScreenletView, LoginViewModel {
 	}
 
 	override public func onSetTranslations() {
-		passwordField?.placeholder = LocalizedString("default", "password-placeholder", self)
+		userNameField?.placeholder = LocalizedString("default",
+			key: BasicAuthMethod.create(basicAuthMethod).description, obj: self)
 
-		loginButton?.replaceAttributedTitle(LocalizedString("default", "signin-button", self),
+		passwordField?.placeholder = LocalizedString("default", key: "password-placeholder", obj: self)
+
+		loginButton?.replaceAttributedTitle(LocalizedString("default", key: "signin-button", obj: self),
 				forState: .Normal)
 
-		authorizeButton?.replaceAttributedTitle(LocalizedString("default", "authorize-button", self),
+		authorizeButton?.replaceAttributedTitle(LocalizedString("default", key: "authorize-button", obj: self),
 				forState: .Normal)
 	}
 
@@ -123,18 +107,8 @@ public class LoginView_default: BaseScreenletView, LoginViewModel {
 		return DefaultProgressPresenter()
 	}
 
-
-	//MARK: UITextFieldDelegate
-
-	internal func textFieldShouldBeginEditing(textField: UITextField!) -> Bool {
-		userNameBackground?.highlighted = (textField == userNameField);
-		passwordBackground?.highlighted = (textField == passwordField);
-
-		return true
-	}
-
 	public func configureAuthType() {
-		let auth = AuthType(rawValue: authType!) ?? .Basic
+		let auth = AuthTypeFromString(authType ?? "") ?? .Basic
 
 		authorizeButton?.hidden = (auth != .OAuth)
 		loginButton?.superview?.hidden = (auth != .Basic)

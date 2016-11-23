@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>companyId</key>
+	<integer>20116</integer>
+	<key>server</key>
+	<string>http://screens-challenge.liferay.org.es</string>
+	<key>groupId</key>
+	<integer>38743</integer>
+	<key>folderId</key>
+	<integer>38748</integer>
+</dict>
+</plist>

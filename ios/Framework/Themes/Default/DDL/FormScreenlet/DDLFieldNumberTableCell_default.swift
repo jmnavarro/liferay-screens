@@ -35,7 +35,7 @@ public class DDLFieldNumberTableCell_default: DDLBaseFieldTextboxTableCell_defau
 	override public func onChangedField() {
 		super.onChangedField()
 
-		if let numberField = field as? DDLFieldNumber {
+		if let numberField = field as? DDMFieldNumber {
 			if let currentValue = numberField.currentValue as? NSNumber {
 				stepper?.value = currentValue.doubleValue
 			}
@@ -47,7 +47,7 @@ public class DDLFieldNumberTableCell_default: DDLBaseFieldTextboxTableCell_defau
 			shouldChangeCharactersInRange range: NSRange,
 			replacementString string: String) -> Bool {
 
-		let newText = (textField.text as NSString).stringByReplacingCharactersInRange(range,
+		let newText = (textField.text! as NSString).stringByReplacingCharactersInRange(range,
 				withString:string)
 
 		if newText != "" {

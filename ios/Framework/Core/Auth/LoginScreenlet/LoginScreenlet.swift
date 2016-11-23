@@ -14,7 +14,7 @@
 import UIKit
 
 
-@objc public protocol LoginScreenletDelegate {
+@objc public protocol LoginScreenletDelegate : BaseScreenletDelegate {
 
 	optional func screenlet(screenlet: BaseScreenlet,
 			onLoginResponseUserAttributes attributes: [String:AnyObject])
@@ -22,8 +22,11 @@ import UIKit
 	optional func screenlet(screenlet: BaseScreenlet,
 			onLoginError error: NSError)
 
-	optional func onScreenletCredentialsSaved(screenlet: BaseScreenlet)
-	optional func onScreenletCredentialsLoaded(screenlet: BaseScreenlet)
+	optional func screenlet(screenlet: BaseScreenlet,
+		onCredentialsSavedUserAttributes attributes: [String:AnyObject])
+
+	optional func screenlet(screenlet: LoginScreenlet,
+		onCredentialsLoadedUserAttributes attributes: [String:AnyObject])
 
 }
 
@@ -34,15 +37,11 @@ public class LoginScreenlet: BaseScreenlet, BasicAuthBasedType {
 
 	@IBInspectable public var basicAuthMethod: String? = BasicAuthMethod.Email.rawValue {
 		didSet {
-			copyBasicAuth(source: self, target: screenletView)
+			(screenletView as? BasicAuthBasedType)?.basicAuthMethod = basicAuthMethod
 		}
 	}
 
-	@IBInspectable public var saveCredentials: Bool = false {
-		didSet {
-			(screenletView as? BasicAuthBasedType)?.saveCredentials = self.saveCredentials
-		}
-	}
+	@IBInspectable public var saveCredentials: Bool = false
 
 	@IBInspectable public var companyId: Int64 = 0
 
@@ -59,11 +58,33 @@ public class LoginScreenlet: BaseScreenlet, BasicAuthBasedType {
 	}
 
 
-	@IBOutlet public weak var delegate: LoginScreenletDelegate?
-
+	public var loginDelegate: LoginScreenletDelegate? {
+		return self.delegate as? LoginScreenletDelegate
+	}
 
 	public var viewModel: LoginViewModel {
 		return screenletView as! LoginViewModel
+	}
+
+
+	public func loadStoredCredentials() -> Bool {
+		if SessionContext.loadStoredCredentials() {
+			viewModel.userName = SessionContext.currentContext?.basicAuthUsername
+			viewModel.password = SessionContext.currentContext?.basicAuthPassword
+
+			let userAttributes = SessionContext.currentContext!.userAttributes
+
+			// we don't want the session to be automatically created. Clear it.
+			// User can recreate it again in the delegate method.
+			SessionContext.logout()
+
+			loginDelegate?.screenlet?(self,
+				onCredentialsLoadedUserAttributes: userAttributes)
+
+			return true
+		}
+
+		return false
 	}
 
 
@@ -72,69 +93,66 @@ public class LoginScreenlet: BaseScreenlet, BasicAuthBasedType {
 	override public func onCreated() {
 		super.onCreated()
 		
-		copyBasicAuth(source: self, target: screenletView)
+		(screenletView as? BasicAuthBasedType)?.basicAuthMethod = basicAuthMethod
+
 		copyAuthType()
 
-		if SessionContext.loadSessionFromStore() {
-			viewModel.userName = SessionContext.currentBasicUserName
-			viewModel.password = SessionContext.currentBasicPassword
-
-			delegate?.onScreenletCredentialsLoaded?(self)
-		}
 	}
 
-	override public func createInteractor(#name: String, sender: AnyObject?) -> Interactor? {
+	override public func createInteractor(name name: String, sender: AnyObject?) -> Interactor? {
 
 		switch name {
-		case "login-action":
-			return createLoginInteractor()
+		case "login-action", BaseScreenlet.DefaultAction:
+			return createLoginBasicInteractor()
 		case "oauth-action":
-			return createOAuthInteractor()
+			return createLoginOAuthInteractor()
 		default:
 			return nil
 		}
 	}
 
-	private func createLoginInteractor() -> LoginInteractor {
-		let interactor = LoginInteractor(screenlet: self)
+	private func createLoginBasicInteractor() -> LoginBasicInteractor {
+		let interactor = LoginBasicInteractor(loginScreenlet: self)
 
 		interactor.onSuccess = {
-			self.delegate?.screenlet?(self,
+			self.loginDelegate?.screenlet?(self,
 					onLoginResponseUserAttributes: interactor.resultUserAttributes!)
 
-			if self.viewModel.saveCredentials {
-				if SessionContext.storeSession() {
-					self.delegate?.onScreenletCredentialsSaved?(self)
+			if let ctx = SessionContext.currentContext where self.saveCredentials {
+				if ctx.storeCredentials() {
+					self.loginDelegate?.screenlet?(self,
+						onCredentialsSavedUserAttributes: interactor.resultUserAttributes!)
 				}
 			}
 		}
 
 		interactor.onFailure = {
-			self.delegate?.screenlet?(self, onLoginError: $0)
+			self.loginDelegate?.screenlet?(self, onLoginError: $0)
 		}
 
 		return interactor
 	}
 
-	private func createOAuthInteractor() -> OAuthInteractor {
-		let interactor = OAuthInteractor(
+	private func createLoginOAuthInteractor() -> LoginOAuthInteractor {
+		let interactor = LoginOAuthInteractor(
 				screenlet: self,
 				consumerKey: OAuthConsumerKey,
 				consumerSecret: OAuthConsumerSecret)
 
 		interactor.onSuccess = {
-			self.delegate?.screenlet?(self,
+			self.loginDelegate?.screenlet?(self,
 					onLoginResponseUserAttributes: interactor.resultUserAttributes!)
 
-			if self.saveCredentials {
-				if SessionContext.storeSession() {
-					self.delegate?.onScreenletCredentialsSaved?(self)
+			if let ctx = SessionContext.currentContext where self.saveCredentials {
+				if ctx.storeCredentials() {
+					self.loginDelegate?.screenlet?(self,
+						onCredentialsSavedUserAttributes: interactor.resultUserAttributes!)
 				}
 			}
 		}
 
 		interactor.onFailure = {
-			self.delegate?.screenlet?(self, onLoginError: $0)
+			self.loginDelegate?.screenlet?(self, onLoginError: $0)
 			return
 		}
 
@@ -143,12 +161,9 @@ public class LoginScreenlet: BaseScreenlet, BasicAuthBasedType {
 
 
 	private func copyAuthType() {
-		if OAuthConsumerKey != "" && OAuthConsumerSecret != "" {
-			(screenletView as? LoginViewModel)?.authType = AuthType.OAuth.rawValue
-		}
-		else {
-			(screenletView as? LoginViewModel)?.authType = AuthType.Basic.rawValue
-		}
+		(screenletView as? LoginViewModel)?.authType = StringFromAuthType(
+			(OAuthConsumerKey != "" && OAuthConsumerSecret != "")
+				? AuthType.OAuth : AuthType.Basic)
 	}
 
 }

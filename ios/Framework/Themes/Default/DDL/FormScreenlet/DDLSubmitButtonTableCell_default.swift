@@ -14,7 +14,7 @@
 import UIKit
 
 
-public class DDLSubmitButtonTableCell_default: DDLFieldTableCell {
+public class DDLSubmitButtonTableCell_default: DDMFieldTableCell {
 
 	@IBOutlet public var submitButton: UIButton?
 
@@ -25,7 +25,7 @@ public class DDLSubmitButtonTableCell_default: DDLFieldTableCell {
 	}
 
 
-	//MARK: DDLFieldTableCell
+	//MARK: DDMFieldTableCell
 
 	override public func awakeFromNib() {
 		super.awakeFromNib()
@@ -33,7 +33,7 @@ public class DDLSubmitButtonTableCell_default: DDLFieldTableCell {
 		setButtonDefaultStyle(submitButton)
 
 		submitButton?.replaceAttributedTitle(
-				LocalizedString("default", "ddlform-submit-button", self),
+				LocalizedString("default", key: "ddlform-submit-button", obj: self),
 				forState: .Normal)
 	}
 

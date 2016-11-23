@@ -14,7 +14,7 @@
 import UIKit
 
 
-@objc public protocol DDLFormScreenletDelegate {
+@objc public protocol DDLFormScreenletDelegate : BaseScreenletDelegate {
 
 	optional func screenlet(screenlet: DDLFormScreenlet,
 			onFormLoaded record: DDLRecord)
@@ -35,26 +35,25 @@ import UIKit
 			onFormSubmitError error: NSError)
 
 	optional func screenlet(screenlet: DDLFormScreenlet,
-			onDocumentFieldUploadStarted field: DDLFieldDocument)
+			onDocumentFieldUploadStarted field: DDMFieldDocument)
 
 	optional func screenlet(screenlet: DDLFormScreenlet,
-			onDocumentField field: DDLFieldDocument,
-			uploadedBytes bytes: UInt,
-			sentBytes sent: Int64,
-			totalBytes total: Int64)
+			onDocumentField field: DDMFieldDocument,
+			uploadedBytes bytes: UInt64,
+			totalBytes total: UInt64)
 
 	optional func screenlet(screenlet: DDLFormScreenlet,
-			onDocumentField field: DDLFieldDocument,
+			onDocumentField field: DDMFieldDocument,
 			uploadResult result: [String:AnyObject])
 
 	optional func screenlet(screenlet: DDLFormScreenlet,
-			onDocumentField field: DDLFieldDocument,
+			onDocumentField field: DDMFieldDocument,
 			uploadError error: NSError)
 
 }
 
 
-@IBDesignable public class DDLFormScreenlet: BaseScreenlet {
+public class DDLFormScreenlet: BaseScreenlet {
 
 	private enum UploadStatus {
 		case Idle
@@ -93,7 +92,14 @@ import UIKit
 
 	@IBInspectable public var offlinePolicy: String? = CacheStrategyType.RemoteFirst.rawValue
 
-	@IBOutlet public weak var delegate: DDLFormScreenletDelegate?
+
+	public var ddlFormDelegate: DDLFormScreenletDelegate? {
+		return delegate as? DDLFormScreenletDelegate
+	}
+
+	public var viewModel: DDLFormViewModel {
+		return screenletView as! DDLFormViewModel
+	}
 
 	public var isFormLoaded: Bool {
 		return !((screenletView as? DDLFormView)?.isRecordEmpty ?? true)
@@ -103,10 +109,6 @@ import UIKit
 		return screenletView as! DDLFormView
 	}
 
-	internal var viewModel: DDLFormViewModel {
-		return screenletView as! DDLFormViewModel
-	}
-
 	private var uploadStatus = UploadStatus.Idle
 
 
@@ -114,6 +116,7 @@ import UIKit
 
 	override public func onCreated() {
 		formView.showSubmitButton = showSubmitButton
+		screenletView?.editable = self.editable
 	}
 
 	override public func onShow() {
@@ -127,7 +130,7 @@ import UIKit
 		}
 	}
 
-	override public func createInteractor(#name: String, sender: AnyObject?) -> Interactor? {
+	override public func createInteractor(name name: String, sender: AnyObject?) -> Interactor? {
 		switch name {
 			case DDLFormScreenlet.LoadFormAction:
 				return createLoadFormInteractor()
@@ -136,8 +139,8 @@ import UIKit
 			case DDLFormScreenlet.SubmitFormAction:
 				return createSubmitFormInteractor()
 			case DDLFormScreenlet.UploadDocumentAction:
-				if sender is DDLFieldDocument {
-					return createUploadDocumentInteractor(sender as! DDLFieldDocument)
+				if sender is DDMFieldDocument {
+					return createUploadDocumentInteractor(sender as! DDMFieldDocument)
 				}
 			default: ()
 		}
@@ -145,13 +148,13 @@ import UIKit
 		return nil
 	}
 
-	override public func onAction(#name: String, interactor: Interactor, sender: AnyObject?) -> Bool {
+	override public func onAction(name name: String, interactor: Interactor, sender: AnyObject?) -> Bool {
 		let result = super.onAction(name: name, interactor: interactor, sender: sender)
 
 		if result && name == DDLFormScreenlet.UploadDocumentAction {
 			let uploadInteractor = interactor as! DDLFormUploadDocumentInteractor
 
-			delegate?.screenlet?(self,
+			ddlFormDelegate?.screenlet?(self,
 					onDocumentFieldUploadStarted: uploadInteractor.document)
 
 			switch uploadStatus {
@@ -177,28 +180,27 @@ import UIKit
 				self.userId = interactor.resultUserId ?? self.userId
 				self.formView.record = resultRecordValue
 
-				self.delegate?.screenlet?(self,
+				self.ddlFormDelegate?.screenlet?(self,
 						onFormLoaded: resultRecordValue)
 			}
 		}
 
 		interactor.onFailure = {
-			self.delegate?.screenlet?(self, onFormLoadError: $0)
-			return
+			self.ddlFormDelegate?.screenlet?(self, onFormLoadError: $0)
 		}
 
 		return interactor
 	}
 
 	internal func createSubmitFormInteractor() -> DDLFormSubmitFormInteractor? {
-		if waitForInProgressUpload() {
+		let interactor = DDLFormSubmitFormInteractor(screenlet: self, record: self.formView.record!)
+
+		if waitForInProgressUpload(interactor) {
 			return nil
 		}
 		if self.formView.record == nil {
 			return nil
 		}
-
-		let interactor = DDLFormSubmitFormInteractor(screenlet: self, record: self.formView.record!)
 
 		interactor.cacheStrategy = CacheStrategyType(rawValue: self.offlinePolicy ?? "") ?? .RemoteFirst
 
@@ -207,14 +209,13 @@ import UIKit
 				self.recordId = resultRecordIdValue
 				self.formView.record!.recordId = resultRecordIdValue
 
-				self.delegate?.screenlet?(self,
+				self.ddlFormDelegate?.screenlet?(self,
 						onFormSubmitted: self.formView.record!)
 			}
 		}
 
 		interactor.onFailure = {
-			self.delegate?.screenlet?(self, onFormSubmitError: $0)
-			return
+			self.ddlFormDelegate?.screenlet?(self, onFormSubmitError: $0)
 		}
 
 		return interactor
@@ -234,42 +235,48 @@ import UIKit
 				self.userId = interactor.resultFormUserId ?? self.userId
 				self.formView.record = resultFormRecordValue
 
-				self.delegate?.screenlet?(self,
+				self.ddlFormDelegate?.screenlet?(self,
 						onFormLoaded: resultFormRecordValue)
 			}
 
 			// then set data
-			if let recordValue = self.formView.record {
-				recordValue.updateCurrentValues(interactor.resultRecordData!)
-				recordValue.recordId = interactor.resultRecordId!
+			if let recordValue = self.formView.record,
+					data = interactor.resultRecordData,
+					recordId = interactor.resultRecordId
+				where interactor.lastError == nil {
+
+				recordValue.updateCurrentValues(values: data)
+				recordValue.recordId = recordId
 
 				self.formView.refresh()
 
-				self.delegate?.screenlet?(self, onRecordLoaded: recordValue)
+				self.ddlFormDelegate?.screenlet?(self, onRecordLoaded: recordValue)
+			}
+			else {
+				self.ddlFormDelegate?.screenlet?(self,
+						onRecordLoadError: interactor.lastError ?? NSError.errorWithCause(.InvalidServerResponse))
 			}
 		}
 
 		interactor.onFailure = {
-			self.delegate?.screenlet?(self, onRecordLoadError: $0)
-			return
+			self.ddlFormDelegate?.screenlet?(self, onRecordLoadError: $0)
 		}
 
 		return interactor
 	}
 
 	internal func createUploadDocumentInteractor(
-			document: DDLFieldDocument)
+			document: DDMFieldDocument)
 			-> DDLFormUploadDocumentInteractor {
 
-		func onUploadedBytes(document: DDLFieldDocument, bytes: UInt, sent: Int64, total: Int64) {
+		func onUploadedBytes(document: DDMFieldDocument, sent: UInt64, total: UInt64) {
 			switch uploadStatus {
 				case .Uploading(_, _):
 					formView.changeDocumentUploadStatus(document)
 
-				delegate?.screenlet?(self,
+					ddlFormDelegate?.screenlet?(self,
 						onDocumentField: document,
-						uploadedBytes: bytes,
-						sentBytes: sent,
+						uploadedBytes: sent,
 						totalBytes: total)
 
 				default: ()
@@ -286,7 +293,7 @@ import UIKit
 		interactor.onSuccess = {
 			self.formView.changeDocumentUploadStatus(interactor.document)
 
-			self.delegate?.screenlet?(self,
+			self.ddlFormDelegate?.screenlet?(self,
 					onDocumentField: interactor.document,
 					uploadResult: interactor.resultResponse!)
 
@@ -317,7 +324,7 @@ import UIKit
 				self.formView.showField(interactor.document)
 			}
 
-			self.delegate?.screenlet?(self,
+			self.ddlFormDelegate?.screenlet?(self,
 					onDocumentField: interactor.document,
 					uploadError: $0)
 
@@ -350,14 +357,14 @@ import UIKit
 
 	//MARK: Private methods
 
-	private func waitForInProgressUpload() -> Bool {
+	private func waitForInProgressUpload(interactor: Interactor) -> Bool {
 		switch uploadStatus {
 			case .Failed(_):
-				retryUploads()
+				retryUploads(interactor)
 
 				return true
 
-			case .Uploading(let uploadCount, let submitRequested)
+			case .Uploading(_, let submitRequested)
 			where submitRequested:
 				return true
 
@@ -368,9 +375,8 @@ import UIKit
 				let uploadMessage = (uploadCount == 1)
 						? "uploading-message-singular" : "uploading-message-plural"
 
-				showHUDWithMessage(LocalizedString("ddlform-screenlet", uploadMessage, self),
-					closeMode: .ManualClose,
-					spinnerMode: .IndeterminateSpinner)
+				showHUDWithMessage(LocalizedString("ddlform-screenlet", key: uploadMessage, obj: self),
+					forInteractor: interactor)
 
 				return true
 
@@ -380,9 +386,9 @@ import UIKit
 		return false
 	}
 
-	private func retryUploads() {
+	private func retryUploads(interactor: Interactor) {
 		let failedDocumentFields = formView.record?.fields.filter() {
-			if let fieldUploadStatus = ($0 as? DDLFieldDocument)?.uploadStatus {
+			if let fieldUploadStatus = ($0 as? DDMFieldDocument)?.uploadStatus {
 				switch fieldUploadStatus {
 					case .Failed(_): return true
 					default: ()
@@ -394,9 +400,8 @@ import UIKit
 
 		if let failedUploads = failedDocumentFields {
 			if failedUploads.count > 0 {
-				showHUDWithMessage(LocalizedString("ddlform-screenlet", "uploading-retry", self),
-					closeMode: .ManualClose,
-					spinnerMode: .IndeterminateSpinner)
+				showHUDWithMessage(LocalizedString("ddlform-screenlet", key: "uploading-retry", obj: self),
+					forInteractor: interactor)
 
 				for failedDocumentField in failedUploads {
 					performAction(

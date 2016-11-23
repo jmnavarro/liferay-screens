@@ -17,12 +17,18 @@ import Foundation
 extension NSLocale {
 
 	public class var currentLanguageString: String {
-		var preferredLanguage = NSLocale.preferredLanguages()[0].description as String
+		get {
+			var preferredLanguage = NSLocale.preferredLanguages()[0] 
 
-		preferredLanguage = preferredLanguage.substringToIndex(
-				advance(preferredLanguage.startIndex, 2))
+			preferredLanguage = preferredLanguage.substringToIndex(
+				preferredLanguage.startIndex.advancedBy(2))
 
-		return preferredLanguage
+			return preferredLanguage
+		}
+		set {
+			NSUserDefaults.standardUserDefaults().setObject([newValue], forKey: "AppleLanguages")
+			NSUserDefaults.standardUserDefaults().synchronize()
+		}
 	}
 
 	public class var currentLocaleString: String {
@@ -33,25 +39,34 @@ extension NSLocale {
 			case "ca", "es":
 				return language + "_ES"
 			case "zh":
-				return language + "_CN"
+				return "zh_CN"
 			case "fi":
-				return language + "_FI"
+				return "fi_FI"
 			case "fr":
-				return language + "_FR"
+				return "fr_FR"
 			case "de":
-				return language + "_DE"
+				return "de_DE"
 			case "iw", "he":
 				return "iw_IL"
 			case "hu":
-				return language + "_HU"
+				return "hu_HU"
 			case "ja":
-				return language + "_JP"
+				return "ja_JP"
 			case "pt":
-				return language + "_BR"
+				return "pr_BR"
 			default: ()
 		}
 
 		return "en_US"
 	}
+
+	public class func bundleForLanguage(language: String, bundle: NSBundle) -> NSBundle? {
+		guard let path = bundle.pathForResource(language, ofType: "lproj") else {
+			return nil
+		}
+
+		return NSBundle(path: path)
+	}
+
 
 }

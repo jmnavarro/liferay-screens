@@ -1,17 +1,40 @@
 language: objective-c
-osx_image: xcode611
+osx_image: xcode8
 
-before_install:
-    - export LANG=en_US.UTF-8
-    - gem install cocoapods
-    - brew update > /dev/null
-    - brew outdated xctool || brew upgrade xctool
-    - env
-    - locale
-    - pod --version
+env:
+  global:
+   - ADB_INSTALL_TIMEOUT=10
+   - LICENSES="android-sdk-license-5be876d5|mips-android-sysimage-license-15de68cc|intel-android-sysimage-license-1ea702d1|android-sdk-license-ed0d0a5b|android-sdk-license-c81a61d9"
+   - COMPONENTS=build-tools-23.0.3,android-23,extra-android-m2repository,extra-google-m2repository
+  matrix:
+    - PLATFORM=iOS
+    - PLATFORM=Android
+    - DANGER=1
 
+cache:
+  directories:
+    - $HOME/android/library/.gradle/
+
+podfile: ios/Framework
+before_script:
+ - |
+   if [ "$PLATFORM" = Android ]; then
+        curl -L https://raw.github.com/embarkmobile/android-sdk-installer/version-2/android-sdk-installer | bash /dev/stdin --install=$COMPONENTS --accept=$LICENSES && source ~/.android-sdk-installer/env
+   elif [ "${DANGER}" -eq 1 ]; then
+        bundle install
+   fi 
 script:
-    - cd ios/Framework
-    - pod install
-    - ./run-tests.sh
-    - cd ../..
+- |
+   if [ "$PLATFORM" = Android ]; then
+        cd android
+        sh gradlew clean
+        sh gradlew assembleTravisci
+        sh gradlew test
+     elif [ "$PLATFORM" = iOS ]; then
+         cd ios/Framework
+         pod install
+         set -o pipefail
+         travis_retry xcodebuild clean test -workspace LiferayScreens.xcworkspace -scheme LiferayScreens -destination "platform=iOS Simulator,name=iPhone SE" | xcpretty
+    elif [ "${DANGER}" -eq 1 ]; then
+         bundle exec danger
+    fi

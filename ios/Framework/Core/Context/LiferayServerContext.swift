@@ -14,7 +14,15 @@
 import Foundation
 
 
-public class LiferayServerContext {
+@objc public enum LiferayServerVersion: Int {
+
+	case v62 = 62
+	case v70 = 70
+
+}
+
+
+@objc public class LiferayServerContext: NSObject {
 
 	//MARK: Singleton type
 
@@ -31,8 +39,23 @@ public class LiferayServerContext {
 			return StaticInstance.serverProperties!["server"] as! String
 		}
 		set {
-			loadContextFile ()
+			loadContextFile()
 			StaticInstance.serverProperties!["server"] = newValue
+		}
+	}
+
+	public class var serverVersion: LiferayServerVersion {
+		get {
+			loadContextFile()
+			let value = StaticInstance.serverProperties?["version"]
+			let version =  (value as? Int) ?? Int((value as? String) ?? "")
+			return LiferayServerVersion(
+				rawValue: version ?? LiferayServerVersion.v70.rawValue)
+					?? .v70
+		}
+		set {
+			loadContextFile()
+			StaticInstance.serverProperties!["version"] = newValue.rawValue
 		}
 	}
 
@@ -42,7 +65,7 @@ public class LiferayServerContext {
 			return (StaticInstance.serverProperties!["companyId"] as! NSNumber).longLongValue
 		}
 		set {
-			loadContextFile ()
+			loadContextFile()
 			StaticInstance.serverProperties!["companyId"] = NSNumber(longLong: newValue)
 		}
 	}
@@ -53,58 +76,170 @@ public class LiferayServerContext {
 			return (StaticInstance.serverProperties!["groupId"] as! NSNumber).longLongValue
 		}
 		set {
-			loadContextFile ()
+			loadContextFile()
 			StaticInstance.serverProperties!["groupId"] = NSNumber(longLong: newValue)
+		}
+	}
+
+	public class var factory: ScreensFactory {
+		get {
+			loadContextFile()
+			return StaticInstance.serverProperties!["factory"] as! ScreensFactory
+		}
+		set {
+			loadContextFile()
+			StaticInstance.serverProperties!["factory"] = newValue
+		}
+	}
+
+	public class var connectorFactory: LiferayConnectorFactory {
+		get {
+			loadContextFile()
+			return StaticInstance.serverProperties!["connectorFactory"] as! LiferayConnectorFactory
+		}
+		set {
+			loadContextFile()
+			StaticInstance.serverProperties!["connectorFactory"] = newValue
 		}
 	}
 
 
 	//MARK: Public methods
 
-	public class func valueForKey(key: String) -> AnyObject? {
-		loadContextFile()
-		return StaticInstance.serverProperties![key]
-	}
-
-	public class func setValue(value: AnyObject, forKey key: String) {
+	public class func setPropertyValue(value: AnyObject, forKey key: String) {
 		loadContextFile()
 		return StaticInstance.serverProperties![key] = value
+	}
+	
+	public class func propertyForKey(key: String) -> AnyObject {
+		loadContextFile()
+		
+		guard let value = StaticInstance.serverProperties?[key] else {
+			fatalError("Missing key \(key) on liferay-server-context.plist file")
+		}
+		
+		return value
+	}
+	
+	public class func numberPropertyForKey(key: String) -> NSNumber {
+		guard let value = propertyForKey(key) as? NSNumber else {
+			fatalError("Key \(key) is not a NSNumber")
+		}
+		
+		return value
+	}
+	
+	public class func longPropertyForKey(key: String) -> Int64 {
+		return numberPropertyForKey(key).longLongValue
+	}
+	
+	public class func intPropertyForKey(key: String) -> Int {
+		return numberPropertyForKey(key).integerValue
+	}
+	
+	public class func booleanPropertyForKey(key: String) -> Bool {
+		guard let value = propertyForKey(key) as? Bool else {
+			fatalError("Key \(key) is not a Boolean")
+		}
+		
+		return value
+	}
+	
+	public class func datePropertyForKey(key: String) -> NSDate {
+		guard let value = propertyForKey(key) as? NSDate else {
+			fatalError("Key \(key) is not a NSDate")
+		}
+		
+		return value
+	}
+	
+	public class func stringPropertyForKey(key: String) -> String {
+		guard let value = propertyForKey(key) as? String else {
+			fatalError("Key \(key) is not a String")
+		}
+		
+		return value
 	}
 
 
 	//MARK: Private methods
 
 	private class func loadContextFile() {
-		if StaticInstance.serverProperties != nil {
+
+		func createFactory() {
+			guard let className = StaticInstance.serverProperties?["factory"] as? String else {
+				StaticInstance.serverProperties!["factory"] = ScreensFactoryImpl()
+				return
+			}
+			guard let factoryInstance = dynamicInit(className) as? ScreensFactory else {
+				StaticInstance.serverProperties!["factory"] = ScreensFactoryImpl()
+				return
+			}
+
+			StaticInstance.serverProperties!["factory"] = factoryInstance
+		}
+
+		func createConnectorFactory() {
+
+			func createDynamicConnectorFactory() -> LiferayConnectorFactory? {
+				guard let className = StaticInstance.serverProperties?["connectorFactoryClassName"] as? String else {
+					return nil
+				}
+
+				return dynamicInit(className) as? LiferayConnectorFactory
+			}
+
+			func createVersionConnectorFactory() -> LiferayConnectorFactory {
+				switch self.serverVersion {
+				case .v62:
+					return Liferay62ConnectorFactory()
+				case .v70:
+					return Liferay70ConnectorFactory()
+				}
+			}
+
+			StaticInstance.serverProperties!["connectorFactory"] =
+				createDynamicConnectorFactory() ?? createVersionConnectorFactory()
+		}
+
+		guard StaticInstance.serverProperties == nil else {
 			return
 		}
 
-		let bundles = NSBundle.allBundles(self).reverse()
+		let bundles = Array(NSBundle.allBundles(self).reverse())
 
 		var found = false
 		var foundFallback = false
 
 		var i = 0
-		let length = count(bundles)
+		let length = bundles.count
 
 		while !found && i < length {
-			let bundle = bundles[i++]
+			let bundle = bundles[i]
+			i += 1
 
 			if let path = bundle.pathForResource(PlistFile, ofType:"plist") {
 				StaticInstance.serverProperties = NSMutableDictionary(contentsOfFile: path)
+				createFactory()
+				createConnectorFactory()
 				found = true
 			}
 			else {
 				if let path = bundle.pathForResource(PlistFileSample, ofType:"plist") {
 					StaticInstance.serverProperties = NSMutableDictionary(contentsOfFile: path)
+					createFactory()
+					createConnectorFactory()
 					foundFallback = true
 				}
 				else {
 					StaticInstance.serverProperties = [
-							"companyId": 10157,
-							"groupId": 10184,
-							"server": "http://localhost:8080"]
-
+						"companyId": 10157,
+						"groupId": 10184,
+						"server": "http://localhost:8080",
+						"version": LiferayServerVersion.v70.rawValue
+					]
+					createFactory()
+					createConnectorFactory()
 				}
 			}
 		}
@@ -114,13 +249,13 @@ public class LiferayServerContext {
 		}
 		else {
 			if foundFallback {
-				println("WARNING: \(PlistFile).plist file is not found. " +
-						"Falling back to template \(PlistFileSample).list")
+				print("WARNING: \(PlistFile).plist file is not found. " +
+						"Falling back to template \(PlistFileSample).list\n")
 			}
 			else {
-				println("ERROR: \(PlistFileSample).plist file is not found. " +
+				print("ERROR: \(PlistFileSample).plist file is not found. " +
 						"Using default values which will work in a default Liferay bundle " +
-						"running on localhost:8080")
+						"running on localhost:8080\n")
 			}
 		}
 	}

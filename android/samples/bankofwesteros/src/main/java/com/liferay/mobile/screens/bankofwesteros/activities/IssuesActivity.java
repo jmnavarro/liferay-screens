@@ -1,10 +1,14 @@
 package com.liferay.mobile.screens.bankofwesteros.activities;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
@@ -13,55 +17,66 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import com.jakewharton.rxbinding.view.RxView;
 import com.liferay.mobile.screens.bankofwesteros.R;
 import com.liferay.mobile.screens.bankofwesteros.utils.Card;
 import com.liferay.mobile.screens.bankofwesteros.utils.EndAnimationListener;
 import com.liferay.mobile.screens.base.list.BaseListListener;
-import com.liferay.mobile.screens.base.list.BaseListScreenlet;
 import com.liferay.mobile.screens.context.SessionContext;
 import com.liferay.mobile.screens.ddl.form.DDLFormListener;
 import com.liferay.mobile.screens.ddl.form.DDLFormScreenlet;
 import com.liferay.mobile.screens.ddl.list.DDLListScreenlet;
 import com.liferay.mobile.screens.ddl.model.DocumentField;
 import com.liferay.mobile.screens.ddl.model.Record;
-import com.liferay.mobile.screens.viewsets.defaultviews.LiferayCrouton;
-
-import org.json.JSONObject;
-
-import java.text.SimpleDateFormat;
+import com.liferay.mobile.screens.viewsets.westeros.WesterosSnackbar;
+import com.tbruyelle.rxpermissions.RxPermissions;
+import java.text.DateFormat;
 import java.util.List;
+import java.util.Map;
+import org.json.JSONObject;
+import rx.functions.Action1;
 
 /**
  * @author Javier Gamarra
  */
-public class IssuesActivity extends CardActivity implements View.OnClickListener,
-	DDLFormListener, BaseListListener<Record>, View.OnTouchListener {
+public class IssuesActivity extends CardActivity
+	implements View.OnClickListener, DDLFormListener, BaseListListener<Record>, View.OnTouchListener {
+
+	private DDLFormScreenlet ddlFormScreenlet;
+	private DDLListScreenlet ddlListScreenlet;
+	private Record record;
+	private View backgroundCard;
+	private ImageView card1ToBackground;
+	private ImageView card1ToBackgroundMenu;
+	private TextView reportIssueTitle;
+	private Button sendButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.issues);
 
-		_backgroundCard = findViewById(R.id.background);
+		backgroundCard = findViewById(R.id.background);
 
-		_card1ToBackgroundMenu = (ImageView) findViewById(R.id.card1_to_background_menu);
-		_card1ToBackgroundMenu.setOnClickListener(this);
-		_card1ToBackground = (ImageView) findViewById(R.id.card1_to_background);
-		_card1ToBackground.setOnClickListener(this);
+		card1ToBackgroundMenu = (ImageView) findViewById(R.id.card1_to_background_menu);
+		card1ToBackgroundMenu.setOnClickListener(this);
+		card1ToBackground = (ImageView) findViewById(R.id.card1_to_background);
+		card1ToBackground.setOnClickListener(this);
 
-		_reportIssueTitle = (TextView) findViewById(R.id.report_issue_title);
+		reportIssueTitle = (TextView) findViewById(R.id.report_issue_title);
 
-		_ddlFormScreenlet = (DDLFormScreenlet) findViewById(R.id.ddlform);
-		_ddlFormScreenlet.setListener(this);
-		_ddlListScreenlet = (DDLListScreenlet) findViewById(R.id.ddllist);
-		_ddlListScreenlet.setListener(this);
+		ddlFormScreenlet = (DDLFormScreenlet) findViewById(R.id.ddlform);
+		ddlFormScreenlet.setListener(this);
+		ddlListScreenlet = (DDLListScreenlet) findViewById(R.id.ddllist);
+		ddlListScreenlet.setListener(this);
 
-		_sendButton = (Button) findViewById(R.id.liferay_form_submit);
+		sendButton = (Button) findViewById(R.id.liferay_form_submit);
 
 		TextView callMenuEntry = (TextView) findViewById(R.id.call_menu_entry);
 		callMenuEntry.setText(getCallSpannableString(), TextView.BufferType.SPANNABLE);
-		callMenuEntry.setOnTouchListener(this);
+
+		tryToCall(callMenuEntry);
+
 		findViewById(R.id.account_settings_menu_entry).setOnTouchListener(this);
 		findViewById(R.id.send_message_menu_entry).setOnTouchListener(this);
 		findViewById(R.id.sign_out_menu_entry).setOnTouchListener(this);
@@ -72,7 +87,7 @@ public class IssuesActivity extends CardActivity implements View.OnClickListener
 		super.onResume();
 
 		//we don't want to crash if activity gets restored without session
-		if (!SessionContext.hasSession()) {
+		if (!SessionContext.isLoggedIn()) {
 			finish();
 		}
 	}
@@ -82,16 +97,17 @@ public class IssuesActivity extends CardActivity implements View.OnClickListener
 		switch (v.getId()) {
 			case R.id.card1_to_front_view:
 				goLeftCard1();
-				_reportIssueTitle.setText(getString(R.string.report_issue));
+				reportIssueTitle.setText(getString(R.string.report_issue));
 				break;
 			case R.id.card1_to_background:
 			case R.id.card1_to_background_menu:
-				if (_cardHistory.peek() == Card.BACKGROUND) {
+				if (cardHistory.peek() == Card.BACKGROUND) {
 					toCard1();
-					_card1ToBackgroundMenu.setImageDrawable(getResources().getDrawable(R.drawable.icon_options_red));
-				}
-				else {
-					_card1ToBackgroundMenu.setImageDrawable(getResources().getDrawable(R.drawable.icon_options_close));
+					card1ToBackgroundMenu.setImageDrawable(
+						ResourcesCompat.getDrawable(getResources(), R.drawable.icon_options_red, getTheme()));
+				} else {
+					card1ToBackgroundMenu.setImageDrawable(
+						ResourcesCompat.getDrawable(getResources(), R.drawable.icon_options_close, getTheme()));
 					toBackground();
 				}
 				break;
@@ -101,12 +117,21 @@ public class IssuesActivity extends CardActivity implements View.OnClickListener
 	}
 
 	@Override
+	public void onListPageFailed(int startRow, Exception e) {
+
+	}
+
+	@Override
+	public void onListPageReceived(int startRow, int endRow, List<Record> entries, int rowCount) {
+
+	}
+
+	@Override
 	public void onListItemSelected(Record element, View view) {
 		selectDDLEntry(element);
 		if (view.getId() == R.id.liferay_list_edit) {
 			toCard2();
-		}
-		else if (view.getId() == R.id.liferay_list_view) {
+		} else if (view.getId() == R.id.liferay_list_view) {
 			goRightCard1(element);
 		}
 	}
@@ -114,10 +139,9 @@ public class IssuesActivity extends CardActivity implements View.OnClickListener
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			v.setBackgroundColor(getResources().getColor(android.R.color.white));
+			v.setBackgroundColor(ResourcesCompat.getColor(getResources(), android.R.color.white, getTheme()));
 			return true;
-		}
-		else if (event.getAction() == MotionEvent.ACTION_UP) {
+		} else if (event.getAction() == MotionEvent.ACTION_UP) {
 			launchMenu(v);
 		}
 		return false;
@@ -134,27 +158,11 @@ public class IssuesActivity extends CardActivity implements View.OnClickListener
 	}
 
 	@Override
-	public void onDDLFormLoadFailed(Exception e) {
-	}
-
-	@Override
 	public void onDDLFormLoaded(Record record) {
 	}
 
 	@Override
-	public void onDDLFormRecordLoaded(Record record) {
-	}
-
-	@Override
-	public void onDDLFormRecordLoadFailed(Exception e) {
-	}
-
-	@Override
-	public void onDDLFormRecordAddFailed(Exception e) {
-	}
-
-	@Override
-	public void onDDLFormUpdateRecordFailed(Exception e) {
+	public void onDDLFormRecordLoaded(Record record, Map<String, Object> valuesAndAttributes) {
 	}
 
 	@Override
@@ -166,30 +174,27 @@ public class IssuesActivity extends CardActivity implements View.OnClickListener
 	}
 
 	@Override
-	public void onListPageFailed(BaseListScreenlet source, int page, Exception e) {
-	}
+	public void error(Exception e, String userAction) {
 
-	@Override
-	public void onListPageReceived(BaseListScreenlet source, int page, List<Record> entries,
-								   int rowCount) {
 	}
 
 	@Override
 	protected void animateScreenAfterLoad() {
-		_cardHistory.offer(Card.CARD1);
-		_card1ToBackgroundMenu.setImageDrawable(getResources().getDrawable(R.drawable.icon_options_red));
+		cardHistory.offer(Card.CARD1);
+		card1ToBackgroundMenu.setImageDrawable(
+			ResourcesCompat.getDrawable(getResources(), R.drawable.icon_options_red, getTheme()));
 
 		//TODO extract this animation
-		_backgroundCard.setY(_maxHeight);
-		_card1.setY(_maxHeight);
-		_card2.setY(_maxHeight);
+		backgroundCard.setY(maxHeight);
+		card1.setY(maxHeight);
+		card2.setY(maxHeight);
 
-		_card1.animate().y(_card1RestPosition);
-		_card2.animate().y(_card2FoldedPosition).setListener(new EndAnimationListener() {
+		card1.animate().y(card1RestPosition);
+		card2.animate().y(card2FoldedPosition).setListener(new EndAnimationListener() {
 
 			@Override
 			public void onAnimationEnd(Animator animator) {
-				_backgroundCard.setY(0);
+				backgroundCard.setY(0);
 			}
 		});
 	}
@@ -197,36 +202,36 @@ public class IssuesActivity extends CardActivity implements View.OnClickListener
 	@Override
 	protected void toBackground() {
 		super.toBackground();
-		_card1ToBackground.setImageResource(R.drawable.icon_up);
-		_card1ToBackground.setVisibility(View.VISIBLE);
+		card1ToBackground.setImageResource(R.drawable.icon_up);
+		card1ToBackground.setVisibility(View.VISIBLE);
 	}
 
 	@Override
 	protected void toCard1(Animator.AnimatorListener listener) {
 		super.toCard1(listener);
-		_ddlFormScreenlet.loadForm();
+		ddlFormScreenlet.loadForm();
 
 		clearDDLEntrySelected();
 
-		_card1ToBackgroundMenu.setImageDrawable(getResources().getDrawable(R.drawable.icon_options_red));
-		_card1ToBackground.setImageResource(R.drawable.icon_down);
+		card1ToBackgroundMenu.setImageDrawable(
+			ResourcesCompat.getDrawable(getResources(), R.drawable.icon_options_red, getTheme()));
+		card1ToBackground.setImageResource(R.drawable.icon_down);
 	}
 
 	@Override
 	protected void toCard2() {
 		super.toCard2();
-		if (_entry != null) {
-			_ddlFormScreenlet.setRecordId(_entry.getRecordId());
-			_ddlFormScreenlet.loadRecord();
+		if (record != null) {
+			ddlFormScreenlet.setRecordId(record.getRecordId());
+			ddlFormScreenlet.loadRecord();
 			goLeftCard1();
-		}
-		else {
+		} else {
 			clearDDLEntrySelected();
 		}
 	}
 
 	private SpannableStringBuilder getCallSpannableString() {
-		int darkGrayColor = getResources().getColor(R.color.westeros_dark_gray);
+		int darkGrayColor = ResourcesCompat.getColor(getResources(), R.color.textColorSecondary_westeros, getTheme());
 		int subTitleStart = 4;
 
 		SpannableStringBuilder ssb = new SpannableStringBuilder(getString(R.string.call_menu_entry));
@@ -236,45 +241,46 @@ public class IssuesActivity extends CardActivity implements View.OnClickListener
 	}
 
 	private void selectDDLEntry(Record entry) {
-		_entry = entry;
-		_reportIssueTitle.setText(getString(R.string.edit_issue));
-		_sendButton.setText(getString(R.string.save).toUpperCase());
+		record = entry;
+		reportIssueTitle.setText(getString(R.string.edit_issue));
+		sendButton.setText(getString(R.string.save).toUpperCase());
 	}
 
 	private void clearDDLEntrySelected() {
-		_entry = null;
-		_reportIssueTitle.setText(getString(R.string.report_issue));
-		_sendButton.setText(getString(R.string.send).toUpperCase());
-		_ddlFormScreenlet.setRecordId(0);
+		record = null;
+		reportIssueTitle.setText(getString(R.string.report_issue));
+		sendButton.setText(getString(R.string.send).toUpperCase());
+		ddlFormScreenlet.setRecordId(0);
 	}
 
 	private void reloadListAndShowResult(final String message) {
-		_ddlListScreenlet.loadPage(0);
+		ddlListScreenlet.loadPage(0);
 		toCard1(new EndAnimationListener() {
 
 			@Override
 			public void onAnimationEnd(Animator animator) {
-				LiferayCrouton.info(IssuesActivity.this, message.toUpperCase());
+				WesterosSnackbar.showSnackbar(IssuesActivity.this, message.toUpperCase(), R.color.green_westeros);
 			}
 		});
 	}
 
 	private void goRightCard1(Record element) {
 		TextView issueTitle = (TextView) findViewById(R.id.issue_title);
-		issueTitle.setText(element.getServerValue(getString(R.string.liferay_recordset_fields)));
+		Object serverValue = element.getServerValue(getString(R.string.liferay_recordset_fields));
+		issueTitle.setText(String.valueOf(serverValue));
 
-		String date = new SimpleDateFormat("dd/MM/yyyy").format(element.getServerAttribute("createDate"));
-		((TextView) findViewById(R.id.createdAt)).setText("Created " + date);
+		String date = DateFormat.getDateTimeInstance().format(element.getServerAttribute("createDate"));
+		((TextView) findViewById(R.id.createdAt)).setText(getString(R.string.created, date));
 
 		TextView description = (TextView) findViewById(R.id.description);
-		description.setText(element.getServerValue("Description"));
+		description.setText(String.valueOf(element.getServerValue("Description")));
 
-		String severity = element.getServerValue("Severity");
+		String severity = String.valueOf(element.getServerValue("Severity"));
 		if (severity != null) {
 			severity = severity.replace("[\"", "");
 			severity = severity.replace("\"]", "");
 			TextView severityField = (TextView) findViewById(R.id.severity);
-			severityField.setText("Severity: " + severity);
+			severityField.setText(getString(R.string.severity_detail, severity));
 		}
 
 		goRightCard1();
@@ -288,34 +294,40 @@ public class IssuesActivity extends CardActivity implements View.OnClickListener
 				overridePendingTransition(0, 0);
 				break;
 			case R.id.call_menu_entry:
-				color = R.color.westeros_light_gray;
+				color = R.color.light_gray_westeros;
 
-				startActivity(new Intent(Intent.ACTION_CALL, Uri.parse(getString(R.string.default_telephone_uri))));
 				break;
 			case R.id.send_message_menu_entry:
 				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.default_sms_uri))));
 				break;
 			case R.id.sign_out_menu_entry:
-				color = R.color.westeros_light_gray;
+			default:
+				color = R.color.light_gray_westeros;
 
-				SessionContext.clearSession();
+				SessionContext.logout();
 				Intent intent = new Intent(this, MainActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 				startActivity(intent);
 				break;
 		}
-		v.setBackgroundColor(getResources().getColor(color));
+		v.setBackgroundColor(ResourcesCompat.getColor(getResources(), color, getTheme()));
 	}
 
-	private DDLFormScreenlet _ddlFormScreenlet;
-	private DDLListScreenlet _ddlListScreenlet;
-
-	private Record _entry;
-
-	private View _backgroundCard;
-	private ImageView _card1ToBackground;
-	private ImageView _card1ToBackgroundMenu;
-	private TextView _reportIssueTitle;
-	private Button _sendButton;
-
+	private void tryToCall(final View button) {
+		RxView.clicks(button)
+			.compose(RxPermissions.getInstance(this).ensure(Manifest.permission.CALL_PHONE))
+			.subscribe(new Action1<Boolean>() {
+				@Override
+				public void call(Boolean result) {
+					button.setBackgroundColor(
+						ResourcesCompat.getColor(getResources(), R.color.light_gray_westeros, getTheme()));
+					if (result
+						&& ActivityCompat.checkSelfPermission(IssuesActivity.this, Manifest.permission.CALL_PHONE)
+						== PackageManager.PERMISSION_GRANTED) {
+						startActivity(
+							new Intent(Intent.ACTION_CALL, Uri.parse(getString(R.string.default_telephone_uri))));
+					}
+				}
+			});
+	}
 }

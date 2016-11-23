@@ -18,18 +18,28 @@ import MGSwipeTableCell
 
 public class DDLListView_westeros: DDLListView_default, MGSwipeTableCellDelegate {
 
+	let cellId = "cell"
+
 	var onViewAction: (DDLRecord -> Void)?
 	var onEditAction: (DDLRecord -> Void)?
 
-	override public func doRegisterCellNib(#id: String) {
+	override public func createProgressPresenter() -> ProgressPresenter {
+		return WesterosProgressPresenter()
+	}
+
+	public override func doGetCellId(row row: Int, object: AnyObject?) -> String {
+		return cellId
+	}
+
+	override public func doRegisterCellNibs() {
 		let nib = UINib(
 				nibName: "DDLListViewCell_westeros",
 				bundle: NSBundle(forClass: self.dynamicType))
 
-		self.tableView!.registerNib(nib, forCellReuseIdentifier: id)
+		self.tableView!.registerNib(nib, forCellReuseIdentifier: cellId)
 	}
 
-	override public func doFillLoadedCell(#row: Int, cell: UITableViewCell, object:AnyObject) {
+	override public func doFillLoadedCell(row row: Int, cell: UITableViewCell, object:AnyObject) {
 		if let record = object as? DDLRecord,
 			issueCell = cell as? DDLListViewCell_westeros {
 
@@ -59,7 +69,7 @@ public class DDLListView_westeros: DDLListView_default, MGSwipeTableCellDelegate
 	}
 
 	public func swipeTableCell(
-			cell: MGSwipeTableCell!,
+			cell: MGSwipeTableCell,
 			tappedButtonAtIndex index: Int,
 			direction: MGSwipeDirection,
 			fromExpansion: Bool)

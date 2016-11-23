@@ -14,7 +14,7 @@
 import UIKit
 
 
-@objc public protocol UserPortraitScreenletDelegate {
+@objc public protocol UserPortraitScreenletDelegate : BaseScreenletDelegate {
 
 	optional func screenlet(screenlet: UserPortraitScreenlet,
 			onUserPortraitResponseImage image: UIImage) -> UIImage
@@ -46,17 +46,23 @@ public class UserPortraitScreenlet: BaseScreenlet {
 
 	@IBInspectable public var editable: Bool = false {
 		didSet {
-			(screenletView as? UserPortraitViewModel)?.editable = self.editable
+			screenletView?.editable = self.editable
 		}
 	}
 
 	@IBInspectable public var offlinePolicy: String? = CacheStrategyType.RemoteFirst.rawValue
 
-	@IBOutlet public weak var delegate: UserPortraitScreenletDelegate?
 
+	public var userPortraitDelegate: UserPortraitScreenletDelegate? {
+		return self.delegate as? UserPortraitScreenletDelegate
+	}
 
 	public var viewModel: UserPortraitViewModel {
 		return screenletView as! UserPortraitViewModel
+	}
+
+	public var userId: Int64? {
+		return loadedUserId
 	}
 
 	private var loadedUserId: Int64?
@@ -69,24 +75,24 @@ public class UserPortraitScreenlet: BaseScreenlet {
 
 		viewModel.borderWidth = self.borderWidth
 		viewModel.borderColor = self.borderColor
-		viewModel.editable = self.editable
+		screenletView?.editable = self.editable
 	}
 
 	public func loadLoggedUserPortrait() -> Bool {
-		if SessionContext.currentUserId == nil {
+		guard let userId = SessionContext.currentContext?.userId else {
 			return false
 		}
 
 		let interactor = DownloadUserPortraitInteractor(
 			screenlet: self,
-			userId: SessionContext.currentUserId!)
+			userId: userId)
 
-		loadedUserId = SessionContext.currentUserId
+		loadedUserId = userId
 
 		return performAction(name: "load-portrait", sender: interactor)
 	}
 
-	public func load(#portraitId: Int64, uuid: String, male: Bool = true) -> Bool {
+	public func load(portraitId portraitId: Int64, uuid: String, male: Bool = true) -> Bool {
 		let interactor = DownloadUserPortraitInteractor(
 				screenlet: self,
 				portraitId: portraitId,
@@ -98,7 +104,7 @@ public class UserPortraitScreenlet: BaseScreenlet {
 		return performAction(name: "load-portrait", sender: interactor)
 	}
 
-	public func load(#userId: Int64) -> Bool {
+	public func load(userId userId: Int64) -> Bool {
 		let interactor = DownloadUserPortraitInteractor(
 				screenlet: self,
 				userId: userId)
@@ -108,7 +114,7 @@ public class UserPortraitScreenlet: BaseScreenlet {
 		return performAction(name: "load-portrait", sender: interactor)
 	}
 
-	public func load(#companyId: Int64, emailAddress: String) -> Bool {
+	public func load(companyId companyId: Int64, emailAddress: String) -> Bool {
 		let interactor = DownloadUserPortraitInteractor(
 				screenlet: self,
 				companyId: companyId,
@@ -119,7 +125,7 @@ public class UserPortraitScreenlet: BaseScreenlet {
 		return performAction(name: "load-portrait", sender: interactor)
 	}
 
-	public func load(#companyId: Int64, screenName: String) -> Bool {
+	public func load(companyId companyId: Int64, screenName: String) -> Bool {
 		let interactor = DownloadUserPortraitInteractor(
 				screenlet: self,
 				companyId: companyId,
@@ -130,8 +136,16 @@ public class UserPortraitScreenlet: BaseScreenlet {
 		return performAction(name: "load-portrait", sender: interactor)
 	}
 
-	override public func createInteractor(#name: String, sender: AnyObject?) -> Interactor? {
+	public func loadPlaceholder() {
+		viewModel.image = nil
+	}
+
+	override public func createInteractor(name name: String, sender: AnyObject?) -> Interactor? {
 		let interactor: Interactor?
+
+		if isActionRunning(name) {
+			cancelInteractorsForAction(name)
+		}
 
 		switch name {
 		case "load-portrait":
@@ -142,13 +156,13 @@ public class UserPortraitScreenlet: BaseScreenlet {
 
 			loadInteractor.onSuccess = {
 				if let imageValue = loadInteractor.resultImage {
-					let finalImage = self.delegate?.screenlet?(self, onUserPortraitResponseImage: imageValue)
+					let finalImage = self.userPortraitDelegate?.screenlet?(self, onUserPortraitResponseImage: imageValue)
 
 					self.loadedUserId = loadInteractor.resultUserId
 					self.setPortraitImage(finalImage ?? imageValue)
 				}
 				else {
-					self.delegate?.screenlet?(self, onUserPortraitError: NSError.errorWithCause(.InvalidServerResponse))
+					self.userPortraitDelegate?.screenlet?(self, onUserPortraitError: NSError.errorWithCause(.InvalidServerResponse))
 
 					self.loadedUserId = nil
 					self.setPortraitImage(nil)
@@ -156,7 +170,7 @@ public class UserPortraitScreenlet: BaseScreenlet {
 			}
 
 			loadInteractor.onFailure = {
-				self.delegate?.screenlet?(self, onUserPortraitError: $0)
+				self.userPortraitDelegate?.screenlet?(self, onUserPortraitError: $0)
 
 				self.loadedUserId = nil
 				self.setPortraitImage(nil)
@@ -170,7 +184,7 @@ public class UserPortraitScreenlet: BaseScreenlet {
 				userId = loadedUserIdValue
 			}
 			else {
-				println("ERROR: Can't change the portrait without an userId")
+				print("ERROR: Can't change the portrait without an userId\n")
 
 				return nil
 			}
@@ -183,15 +197,15 @@ public class UserPortraitScreenlet: BaseScreenlet {
 
 			uploadInteractor.cacheStrategy = CacheStrategyType(rawValue: self.offlinePolicy ?? "") ?? .RemoteFirst
 
-			uploadInteractor.onSuccess = { [weak interactor] in
-				self.delegate?.screenlet?(self, onUserPortraitUploaded: uploadInteractor.uploadResult!)
+			uploadInteractor.onSuccess = {
+				self.userPortraitDelegate?.screenlet?(self, onUserPortraitUploaded: uploadInteractor.uploadResult!)
 
 				self.loadedUserId = uploadInteractor.userId
 				self.setPortraitImage(uploadInteractor.image)
 			}
 
 			uploadInteractor.onFailure = {
-				self.delegate?.screenlet?(self, onUserPortraitUploadError: $0)
+				self.userPortraitDelegate?.screenlet?(self, onUserPortraitUploadError: $0)
 			}
 
 		default:
@@ -209,7 +223,7 @@ public class UserPortraitScreenlet: BaseScreenlet {
 
 		if image == nil {
 			let error = NSError.errorWithCause(.AbortedDueToPreconditions)
-			delegate?.screenlet?(self, onUserPortraitError: error)
+			userPortraitDelegate?.screenlet?(self, onUserPortraitError: error)
 		}
 	}
 

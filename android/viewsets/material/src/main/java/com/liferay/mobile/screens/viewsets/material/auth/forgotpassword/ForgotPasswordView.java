@@ -15,9 +15,9 @@
 package com.liferay.mobile.screens.viewsets.material.auth.forgotpassword;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-
 import com.liferay.mobile.screens.auth.BasicAuthMethod;
 import com.liferay.mobile.screens.viewsets.R;
 
@@ -26,6 +26,8 @@ import com.liferay.mobile.screens.viewsets.R;
  */
 public class ForgotPasswordView
 	extends com.liferay.mobile.screens.viewsets.defaultviews.auth.forgotpassword.ForgotPasswordView {
+
+	protected ImageView drawableLogin;
 
 	public ForgotPasswordView(Context context) {
 		super(context);
@@ -43,28 +45,24 @@ public class ForgotPasswordView
 	protected void onFinishInflate() {
 		super.onFinishInflate();
 
-		_drawableLogin = (ImageView) findViewById(R.id.drawable_login);
-		_drawableLogin.setColorFilter(getResources().getColor(R.color.material_primary));
+		drawableLogin = (ImageView) findViewById(R.id.drawable_login);
+		drawableLogin.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorPrimary_material));
 	}
 
 	@Override
 	protected void refreshLoginEditTextStyle() {
 		getLoginEditText().setInputType(getBasicAuthMethod().getInputType());
-		_drawableLogin.setImageResource(getLoginEditTextDrawableId());
+		drawableLogin.setImageResource(getLoginEditTextDrawableId());
 	}
 
 	@Override
 	protected int getLoginEditTextDrawableId() {
 		if (BasicAuthMethod.USER_ID.equals(getBasicAuthMethod())) {
 			return R.drawable.material_account_box;
-		}
-		else if (BasicAuthMethod.EMAIL.equals(getBasicAuthMethod())) {
+		} else if (BasicAuthMethod.EMAIL.equals(getBasicAuthMethod())) {
 			return R.drawable.material_email;
 		}
 
 		return R.drawable.material_account_box;
 	}
-
-	private ImageView _drawableLogin;
-
 }

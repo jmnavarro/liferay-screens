@@ -16,21 +16,16 @@ package com.liferay.mobile.screens.viewsets.material.ddl.list;
 
 import android.content.Context;
 import android.util.AttributeSet;
-
 import com.liferay.mobile.screens.base.list.BaseListScreenletView;
-import com.liferay.mobile.screens.ddl.list.DDLListScreenlet;
 import com.liferay.mobile.screens.ddl.list.view.DDLListViewModel;
 import com.liferay.mobile.screens.ddl.model.Record;
 import com.liferay.mobile.screens.viewsets.R;
-
-import java.util.List;
 
 /**
  * @author Javier Gamarra
  * @author Silvio Santos
  */
-public class DDLListView
-	extends BaseListScreenletView<Record, DDLListAdapter.TwoTextsViewHolder, DDLListAdapter>
+public class DDLListView extends BaseListScreenletView<Record, DDLListAdapter.TwoTextsViewHolder, DDLListAdapter>
 	implements DDLListViewModel {
 
 	public DDLListView(Context context) {
@@ -43,15 +38,6 @@ public class DDLListView
 
 	public DDLListView(Context context, AttributeSet attributes, int defaultStyle) {
 		super(context, attributes, defaultStyle);
-	}
-
-	@Override
-	public void showFinishOperation(int page, List<Record> entries, int rowCount) {
-		DDLListScreenlet screenlet = (DDLListScreenlet) getParent();
-
-		getAdapter().setLabelFields(screenlet.getLabelFields());
-
-		super.showFinishOperation(page, entries, rowCount);
 	}
 
 	@Override
@@ -68,5 +54,4 @@ public class DDLListView
 	protected int getItemProgressLayoutId() {
 		return R.layout.list_item_progress_material;
 	}
-
 }

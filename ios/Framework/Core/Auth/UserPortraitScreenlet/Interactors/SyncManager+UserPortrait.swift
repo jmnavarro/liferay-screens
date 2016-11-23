@@ -21,7 +21,7 @@ extension SyncManager {
 			-> Signal -> () {
 
 		return { signal in
-			let userId = attributes["userId"] as! NSNumber
+			let userId = attributes["userId"]!.longLongValue
 
 			self.cacheManager.getImage(
 					collection: ScreenletName(UserPortraitScreenlet),
@@ -30,31 +30,14 @@ extension SyncManager {
 				if let image = $0 {
 					let interactor = UploadUserPortraitInteractor(
 						screenlet: nil,
-						userId: userId.longLongValue,
+						userId: userId,
 						image: image)
-
-					// this strategy saves the send date after the operation
-					interactor.cacheStrategy = .CacheFirst
-
-					interactor.onSuccess = {
-						self.delegate?.syncManager?(self,
-							onItemSyncScreenlet: ScreenletName(UserPortraitScreenlet),
-							completedKey: key,
-							attributes: attributes)
-
-						signal()
-					}
-
-					interactor.onFailure = { err in
-						self.delegate?.syncManager?(self,
-							onItemSyncScreenlet: ScreenletName(UserPortraitScreenlet),
-							failedKey: key,
-							attributes: attributes,
-							error: err)
-
-						// TODO retry?
-						signal()
-					}
+					
+					self.prepareInteractorForSync(interactor,
+						key: key,
+						attributes: attributes,
+						signal: signal,
+						screenletClassName: ScreenletName(UserPortraitScreenlet))
 
 					if !interactor.start() {
 						signal()

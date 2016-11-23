@@ -14,15 +14,15 @@
 import UIKit
 
 
-class DDLFormUploadDocumentInteractor: ServerWriteOperationInteractor {
+class DDLFormUploadDocumentInteractor: ServerWriteConnectorInteractor {
 
-	typealias OnProgress = LiferayDDLFormUploadOperation.OnProgress
+	typealias OnProgress = DDLFormUploadLiferayConnector.OnProgress
 
 	let filePrefix: String
 	let repositoryId: Int64
 	let groupId: Int64
 	let folderId: Int64
-	let document: DDLFieldDocument
+	let document: DDMFieldDocument
 
 	let onProgressClosure: OnProgress?
 
@@ -32,7 +32,7 @@ class DDLFormUploadDocumentInteractor: ServerWriteOperationInteractor {
 
 
 	init(screenlet: BaseScreenlet?,
-			document: DDLFieldDocument,
+			document: DDMFieldDocument,
 			onProgressClosure: OnProgress) {
 
 		let formScreenlet = screenlet as! DDLFormScreenlet
@@ -57,7 +57,7 @@ class DDLFormUploadDocumentInteractor: ServerWriteOperationInteractor {
 			repositoryId: Int64,
 			groupId: Int64,
 			folderId: Int64,
-			document: DDLFieldDocument) {
+			document: DDMFieldDocument) {
 
 		self.groupId = (groupId != 0)
 			? groupId
@@ -76,22 +76,19 @@ class DDLFormUploadDocumentInteractor: ServerWriteOperationInteractor {
 		super.init(screenlet: nil)
 	}
 
-	override func createOperation() -> LiferayDDLFormUploadOperation {
-		let operation = LiferayDDLFormUploadOperation()
-
-		operation.document = self.document
-		operation.filePrefix = self.filePrefix
-		operation.folderId = self.folderId
-		operation.repositoryId = self.repositoryId
-		operation.onUploadedBytes = self.onProgressClosure
-
-		return operation
+	override func createConnector() -> DDLFormUploadLiferayConnector {
+		return LiferayServerContext.connectorFactory.createDDLFormUploadConnector(
+			document: document,
+			filePrefix: filePrefix,
+			repositoryId: repositoryId,
+			folderId: folderId,
+			onProgress: self.onProgressClosure)
 	}
 
-	override func completedOperation(op: ServerOperation) {
-		if let lastErrorValue = op.lastError {
+	override func completedConnector(c: ServerConnector) {
+		if let lastErrorValue = c.lastError {
 			if lastErrorValue.code == ScreensErrorCause.NotAvailable.rawValue {
-				let cacheResult = DDLFieldDocument.UploadStatus.CachedStatusData(cacheKey())
+				let cacheResult = DDMFieldDocument.UploadStatus.CachedStatusData(cacheKey())
 				self.resultResponse = cacheResult
 				document.uploadStatus = .Uploaded(cacheResult)
 			}
@@ -99,33 +96,38 @@ class DDLFormUploadDocumentInteractor: ServerWriteOperationInteractor {
 				document.uploadStatus = .Failed(lastErrorValue)
 			}
 		}
-		else if let uploadOp = op as? LiferayDDLFormUploadOperation {
-			self.resultResponse = uploadOp.uploadResult
-			document.uploadStatus = .Uploaded(uploadOp.uploadResult!)
+		else if let uploadCon = c as? DDLFormUploadLiferayConnector {
+			self.resultResponse = uploadCon.uploadResult
+			document.uploadStatus = .Uploaded(uploadCon.uploadResult!)
 		}
 	}
 
 
 	//MARK: Cache methods
 
-	override func writeToCache(op: ServerOperation) {
+	override func writeToCache(c: ServerConnector) {
+		guard let cacheManager = SessionContext.currentContext?.cacheManager else {
+			return
+		}
+
 		// cache only supports images (right now)
 		if let image = document.currentValue as? UIImage {
-			let cacheFunction = (cacheStrategy == .CacheFirst || op.lastError != nil)
-				? SessionContext.currentCacheManager?.setDirty
-				: SessionContext.currentCacheManager?.setClean
+			let cacheFunction = (cacheStrategy == .CacheFirst || c.lastError != nil)
+				? cacheManager.setDirty
+				: cacheManager.setClean
 
-			cacheFunction?(
+			cacheFunction(
 				collection: ScreenletName(DDLFormScreenlet),
 				key: cacheKey(),
 				value: image,
-				attributes: cacheAttributes())
+				attributes: cacheAttributes(),
+				onCompletion: nil)
 		}
 	}
 
 	override func callOnSuccess() {
 		if cacheStrategy == .CacheFirst {
-			SessionContext.currentCacheManager?.setClean(
+			SessionContext.currentContext?.cacheManager.setClean(
 				collection: ScreenletName(DDLFormScreenlet),
 				key: cacheKey(),
 				attributes: cacheAttributes())
@@ -146,9 +148,9 @@ class DDLFormUploadDocumentInteractor: ServerWriteOperationInteractor {
 		return [
 			"document": self.document,
 			"filePrefix": self.filePrefix,
-			"folderId": NSNumber(longLong: self.folderId),
-			"groupId": NSNumber(longLong: self.groupId),
-			"repositoryId": NSNumber(longLong: self.repositoryId)
+			"folderId": self.folderId.description,
+			"groupId": self.groupId.description,
+			"repositoryId": self.repositoryId.description
 		]
 	}
 

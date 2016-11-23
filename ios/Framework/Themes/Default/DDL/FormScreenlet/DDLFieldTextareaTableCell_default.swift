@@ -14,21 +14,25 @@
 import UIKit
 
 
-public class DDLFieldTextareaTableCell_default: DDLFieldTableCell, UITextViewDelegate {
+public class DDLFieldTextareaTableCell_default: DDMFieldTableCell, UITextViewDelegate {
 
-	@IBOutlet public var textView: UITextView?
+	@IBOutlet public var textView: UITextView? {
+		didSet {
+			textView?.layer.cornerRadius = 4.0
+			textView?.layer.borderWidth = 1.0
+			textView?.layer.borderColor = UIColor.lightGrayColor().CGColor
+		}
+	}
 	@IBOutlet public var placeholder: UILabel?
-	@IBOutlet public var textViewBackground: UIImageView?
 	@IBOutlet public var label: UILabel?
 	@IBOutlet public var separator: UIView?
 
 	private var originalTextViewRect = CGRectZero
-	private var originalBackgroundRect: CGRect?
 	private var originalSeparatorY: CGFloat?
 	private var originalSeparatorDistance: CGFloat?
 
 
-	//MARK: DDLFieldTableCell
+	//MARK: DDMFieldTableCell
 
 	override public func canBecomeFirstResponder() -> Bool {
 		return textView!.canBecomeFirstResponder()
@@ -39,7 +43,7 @@ public class DDLFieldTextareaTableCell_default: DDLFieldTableCell, UITextViewDel
 	}
 
 	override public func onChangedField() {
-		if let stringField = field as? DDLFieldString {
+		if let stringField = field as? DDMFieldString {
 
 			if stringField.currentValue != nil {
 				textView?.text = stringField.currentValueAsString
@@ -76,7 +80,7 @@ public class DDLFieldTextareaTableCell_default: DDLFieldTableCell, UITextViewDel
 			textView?.returnKeyType = isLastCell ? .Send : .Next
 
 			originalTextViewRect = textView!.frame
-			originalBackgroundRect = textViewBackground?.frame
+
 			if separator != nil {
 				originalSeparatorY = separator!.frame.origin.y
 				originalSeparatorDistance = currentHeight - originalSeparatorY!
@@ -91,20 +95,18 @@ public class DDLFieldTextareaTableCell_default: DDLFieldTableCell, UITextViewDel
 	override public func onPostValidation(valid: Bool) {
 		super.onPostValidation(valid)
 
-		textViewBackground?.image = NSBundle.imageInBundles(
-					name: valid ? "default-field" : "default-field-failed",
-					currentClass: self.dynamicType)
+
 	}
 
 
 	//MARK: UITextViewDelegate
 
 	public func textViewShouldBeginEditing(textView: UITextView) -> Bool {
-		var heightLabelOffset:CGFloat =
-				DDLFieldTextFieldHeightWithLabel - DDLFieldTextFieldHeightWithoutLabel
+		let heightLabelOffset: CGFloat =
+			DDLFieldTextFieldHeightWithLabel - DDLFieldTextFieldHeightWithoutLabel
 
 		let newCellHeight = DDLFieldTextareaExpandedCellHeight +
-				(field!.showLabel ? heightLabelOffset : 0.0)
+			(field!.showLabel ? heightLabelOffset : 0.0)
 
 		setCellHeight(newCellHeight)
 
@@ -118,10 +120,7 @@ public class DDLFieldTextareaTableCell_default: DDLFieldTableCell, UITextViewDel
 			originalTextViewRect.size.width,
 			DDLFieldTextareaExpandedTextViewHeight)
 
-		textViewBackground?.frame.size.height = DDLFieldTextareaExpandedBackgroundHeight
-
-		textViewBackground?.highlighted = true
-
+		textView.layer.borderColor = DefaultThemeBasicBlue.CGColor
 		formView!.firstCellResponder = textView
 
 		return true
@@ -134,12 +133,8 @@ public class DDLFieldTextareaTableCell_default: DDLFieldTableCell, UITextViewDel
 
 		textView.frame = originalTextViewRect
 
-		if let originalBackgroundRect = originalBackgroundRect {
-			textViewBackground?.frame = originalBackgroundRect
-		}
-
-		var heightLabelOffset:CGFloat =
-				DDLFieldTextFieldHeightWithLabel - DDLFieldTextFieldHeightWithoutLabel
+		let heightLabelOffset: CGFloat =
+			DDLFieldTextFieldHeightWithLabel - DDLFieldTextFieldHeightWithoutLabel
 
 		let height = resetCellHeight()
 
@@ -147,12 +142,12 @@ public class DDLFieldTextareaTableCell_default: DDLFieldTableCell, UITextViewDel
 			setCellHeight(height - heightLabelOffset)
 		}
 
-		textViewBackground?.highlighted = false
+		textView.layer.borderColor = UIColor.lightGrayColor().CGColor
 	}
 
 	public func textView(textView: UITextView,
-			shouldChangeTextInRange range: NSRange,
-			replacementText text: String) -> Bool {
+	                     shouldChangeTextInRange range: NSRange,
+	                     replacementText text: String) -> Bool {
 
 		var result = false
 
@@ -160,11 +155,12 @@ public class DDLFieldTextareaTableCell_default: DDLFieldTableCell, UITextViewDel
 			textViewDidEndEditing(textView)
 			nextCellResponder(textView)
 			result = false
-		} else {
+		}
+		else {
 			result = true
 
-			let newText = (textView.text as NSString).stringByReplacingCharactersInRange(range,
-					withString:text)
+			let oriText = textView.text as NSString
+			let newText = oriText.stringByReplacingCharactersInRange(range, withString: text)
 
 			placeholder!.changeVisibility(visible: newText != "")
 

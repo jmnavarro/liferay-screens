@@ -24,25 +24,11 @@ class OAuthWebViewController: UIViewController, UIWebViewDelegate {
 	private let URL: NSURL
 
 	init(URL: NSURL, themeName: String) {
-
-		//TODO move this method to NSBundle+discovery
-		func bundleForXib(nibName: String) -> NSBundle? {
-			let bundles = NSBundle.allBundles(OAuthWebViewController.self);
-
-			for bundle in bundles {
-				if bundle.pathForResource(nibName, ofType:"nib") != nil {
-					return bundle
-				}
-			}
-
-			return nil
-		}
-
 		var nibName = "OAuthWebViewController_\(themeName)"
-		var bundle = bundleForXib(nibName)
+		var bundle = NSBundle.bundleForNibName(nibName, currentClass: self.dynamicType)
 		if bundle == nil {
 			nibName = "OAuthWebViewController_default"
-			bundle = bundleForXib(nibName)
+			bundle = NSBundle.bundleForNibName(nibName, currentClass: self.dynamicType)
 		}
 
 		self.URL = URL
@@ -52,7 +38,7 @@ class OAuthWebViewController: UIViewController, UIWebViewDelegate {
 				bundle: bundle)
 	}
 
-	required init(coder aDecoder: NSCoder) {
+	required init?(coder aDecoder: NSCoder) {
 		URL = NSURL()
 
 		super.init(coder: aDecoder)

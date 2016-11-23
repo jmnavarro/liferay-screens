@@ -15,9 +15,11 @@
 package com.liferay.mobile.screens.testapp;
 
 import android.os.Bundle;
-
-import com.liferay.mobile.screens.webcontentdisplay.WebContentDisplayListener;
-import com.liferay.mobile.screens.webcontentdisplay.WebContentDisplayScreenlet;
+import android.view.MotionEvent;
+import android.webkit.WebView;
+import com.liferay.mobile.screens.webcontent.WebContent;
+import com.liferay.mobile.screens.webcontent.display.WebContentDisplayListener;
+import com.liferay.mobile.screens.webcontent.display.WebContentDisplayScreenlet;
 
 /**
  * @author Javier Gamarra
@@ -30,35 +32,24 @@ public class WebContentDisplayActivity extends ThemeActivity implements WebConte
 
 		setContentView(R.layout.web_content_display);
 
-		WebContentDisplayScreenlet screenlet = (WebContentDisplayScreenlet) findViewById(R.id.web_content_display);
+		WebContentDisplayScreenlet screenlet =
+			(WebContentDisplayScreenlet) findViewById(R.id.web_content_display_screenlet);
 		screenlet.setListener(this);
-
-		screenlet.load();
 	}
 
 	@Override
-	public String onWebContentReceived(WebContentDisplayScreenlet source, String html) {
+	public WebContent onWebContentReceived(WebContent html) {
 		info("Web Content received!");
 		return null;
 	}
 
 	@Override
-	public void onWebContentFailure(WebContentDisplayScreenlet source, Exception e) {
+	public void onWebContentClicked(WebView.HitTestResult result, MotionEvent event) {
+		info("Web Content clicked!");
+	}
+
+	@Override
+	public void error(Exception e, String userAction) {
 		error("Could not receive web content information", e);
-	}
-
-	@Override
-	public void loadingFromCache(boolean success) {
-
-	}
-
-	@Override
-	public void retrievingOnline(boolean triedInCache, Exception e) {
-
-	}
-
-	@Override
-	public void storingToCache(Object object) {
-
 	}
 }
