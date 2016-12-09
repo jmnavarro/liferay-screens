@@ -1,5 +1,9 @@
 # Liferay Screens Contribution Guide
 
+
+Cambiado en rama mi-cambio de repo jmnavarro
+
+
 Before contributing to Liferay Screens, make sure that you have done the following:
 
 1. Read the architecture tutorial for the platform you're contributing to:
